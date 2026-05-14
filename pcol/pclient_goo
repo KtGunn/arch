@@ -1,0 +1,97 @@
+package main
+
+import (
+	"log"
+	"fmt"
+	//"time"
+	"context"
+	//"io"
+
+	pb "mockup/proto"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	//empty "github.com/golang/protobuf/ptypes/empty"
+)
+
+
+// Traffic CLIENT
+//
+type TrafficClientdata struct {
+	client pb.TrafficClient
+	conn *grpc.ClientConn
+	address string
+	ctx context.Context
+}
+
+func NewTrafficClientData() *TrafficClientdata {
+	return &TrafficClientdata{}
+}
+
+var TrafficClient *TrafficClientdata
+
+
+// Bridge CLIENT
+//
+type BridgeClientdata struct {
+	client pb.BridgeClient
+	conn *grpc.ClientConn
+	address string
+	ctx context.Context
+}
+
+func NewBridgeClientData() *BridgeClientdata {
+	return &BridgeClientdata{}
+}
+
+var BridgeClient *BridgeClientdata
+
+
+
+
+func LaunchTrafficClient(ctx context.Context, portC int) {
+	log.Println("Traffic client at ", portC)
+
+	var opts []grpc.DialOption
+	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+	TrafficClient = NewTrafficClientData()
+	TrafficClient.address = fmt.Sprintf("localhost:%d", portC)
+
+	var err error
+	TrafficClient.conn, err = grpc.NewClient(TrafficClient.address, opts...)
+	if err != nil {
+		log.Fatalf("failed to launch a client: %v", err)
+	}
+
+	TrafficClient.client = pb.NewTrafficClient(TrafficClient.conn)
+	TrafficClient.ctx = ctx
+}
+
+func LaunchBridgeClient(ctx context.Context, portB int) {
+	log.Println("Bridge client at ", portB)
+
+	var opts []grpc.DialOption
+	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+	BridgeClient = NewBridgeClientData()
+	BridgeClient.address = fmt.Sprintf("localhost:%d", portB)
+
+	var err error
+	BridgeClient.conn, err = grpc.NewClient(BridgeClient.address, opts...)
+	if err != nil {
+		log.Fatalf("failed to launch a client: %v", err)
+	}
+
+	BridgeClient.client = pb.NewBridgeClient(BridgeClient.conn)
+	BridgeClient.ctx = ctx
+
+}
+
+// LaunchClient
+//
+func LaunchClient(ctx context.Context, portB int, portC int) {
+	log.Println("Launching clients")
+
+	LaunchBridgeClient(ctx, portB)
+	LaunchTrafficClient(ctx, portC)
+}
