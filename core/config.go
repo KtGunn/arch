@@ -8,17 +8,30 @@ import (
 
 type Config struct {
 	role string
-	port int
+	bridgeport int
 }
 
 const usage = `
-./core -role <server,client> <port>
+./core -role <user,client> <bridgeport>
 `
+
+
+func readCommandLine() Config {
+
+	cfg := Config{
+		role: "user",
+		bridgeport: 9067,
+	}
+
+	return parseArgs(cfg)
+}
+
+
 
 func parseArgs(cfg Config) Config {
 	log.Println("usage:", usage)
 
-	flag.StringVar(&cfg.role, "role", cfg.role, "server or client")
+	flag.StringVar(&cfg.role, "role", cfg.role, "user or client")
 	flag.Parse()
 
 	positionalArgs := flag.Args()
@@ -28,7 +41,7 @@ func parseArgs(cfg Config) Config {
 	}
 
 	var err error
-	cfg.port, err = strconv.Atoi(positionalArgs[0])
+	cfg.bridgeport, err = strconv.Atoi(positionalArgs[0])
 
 	if err != nil {
 		log.Fatal("You must enter a legit port number!", positionalArgs[0])

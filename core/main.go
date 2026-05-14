@@ -12,29 +12,13 @@ var wg = sync.WaitGroup{}
 func main() {
 	log.Println("**** Welcome to Main of Core *****")
 
-	cfg := Config{
-		role: "server",
-		port: 9067,
-	}
-	cfg = parseArgs(cfg)
-
-	log.Println("role", cfg.role)
-	log.Println("port", cfg.port)
+	cfg := readCommandLine()
 
 	ctx, cancel := context.WithCancel(context.Background())
+	createAClient(cfg.bridgeport, ctx)
 
-	switch cfg.role {
-	case "server":
-
-	case "client":
-		LaunchClient(cfg.port, ctx)
-
-	default:
-		log.Fatal("role is wrong! ", cfg.role)
-
-	}
-	log.Println(" -- select --")
-
+	defUser := createAUser("", 0)
+	
 	select {
 	case <-time.After(20 * time.Second):
 		log.Println(" time is up")
