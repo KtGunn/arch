@@ -1,0 +1,40 @@
+//
+// April 24, 2026
+// Very simple proto file for testing 
+//
+
+syntax = "proto3";
+package sandbox;
+
+import  "google/protobuf/empty.proto";
+
+
+option go_package = "mockup/proto";
+
+
+// Controller query for state and response
+//
+message StateQuery {
+        string ask = 1;
+}
+message StateResponse {
+        string reply = 1;
+}
+
+
+message HeadCount {
+        string Present = 1;
+}
+
+service Traffic {
+        // Client asking controller for state
+        rpc YourState(StateQuery) returns (StateResponse) {}
+
+        // Server streaming data
+        rpc Data(google.protobuf.Empty) returns (stream  HeadCount) {}
+}
+
+service Bridge {
+        rpc Data(stream HeadCount) returns (google.protobuf.Empty) {}
+        rpc YourState(stream StateResponse) returns (stream StateQuery) {}
+}
