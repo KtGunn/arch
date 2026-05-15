@@ -14,8 +14,10 @@ import (
 )
 
 
-var stateResponse = make(chan string)
-var dataStream = make(chan string)
+var (
+	stateResponse = make(chan string)
+	dataStream = make(chan string)
+)
 
 
 func EngageBridge(ctx context.Context) int {

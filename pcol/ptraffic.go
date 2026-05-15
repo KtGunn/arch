@@ -5,7 +5,7 @@ import (
 	"context"
 	"time"
 	"io"
-	
+
 	pb "mockup/proto"
 	"google.golang.org/grpc"
 	empty "github.com/golang/protobuf/ptypes/empty"
@@ -17,50 +17,44 @@ import (
 // and send data to and from the servers
 //
 func EngageTraffic(ctx context.Context) int {
-	
+
 	goRoutines := 1
 	go func(ctx context.Context, client pb.TrafficClient){
-		StateQuery(ctx, client)
+		StateToAndFro(ctx, client)
 		wg.Done()
 	}(ctx, TrafficClient.Client)
-	
+
 
 	goRoutines++
 	go func(ctx context.Context, client pb.TrafficClient){
 		Data(ctx, client)
 		wg.Done()
 	}(ctx, TrafficClient.Client)
-	
+
 	return goRoutines
 
 }
 
-func StateQuery(ctx context.Context, client pb.TrafficClient) {
-	
+
+
+// StateResponse
+//  This function Receives StateResponse from Controls Traffic Server
+//  and will pass it on to the Bridge client.
+
+func StateToAndFro(ctx context.Context, client pb.TrafficClient) error {
+
 	for {
-		
-		answer, err := client.YourState(ctx,
-			&pb.StateQuery{
-				Ask: "State please!",
-			})
-		
-		if err != nil {
-			log.Println("Failed to query: ", err)
-			<-time.After(10 * time.Second)
-			continue
-		}
-		log.Println("Traf:", answer)
-		
 		select {
-			
-		case <-ctx.Done():
-			log.Println(" Context :: state query")
-			return
-			
-		case <-time.After(5 * time.Second):
-			// queries issue periodically
+		case query := <-stateQyToControls:
+			pbQuery := &pb.StateQuery{
+				Ask: query,
+			}
+			stateResponse, err := client.YourState(ctx, pbQuery)
+			if err != nil {
+				log.Println("error querying Controls", err)
+			}
+			stateResponseToBridge <- stateResponse.Reply
 		}
-		
 	}
 }
 
