@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"flag"
-	"os"
 	"strconv"
 )
 
@@ -13,13 +12,15 @@ const usage = `
 `
 
 func parseInput() int {
+
 	flag.Parse()
-	if len(os.Args) != 2 {
+
+	positionalArgs := flag.Args()
+	if len(positionalArgs) != 1 {
 		log.Fatal(usage)
 	}
-
 	
-	port, err := strconv.Atoi(os.Args[1])
+	port, err := strconv.Atoi(positionalArgs[0])
 	if err != nil {
 		log.Fatal("You must enter a legit port number!")
 	}
