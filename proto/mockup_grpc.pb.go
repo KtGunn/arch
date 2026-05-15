@@ -182,7 +182,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BridgeClient interface {
 	Data(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[HeadCount, empty.Empty], error)
-	YourState(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[StateResponse, StateQuery], error)
+	YourState(ctx context.Context, in *StateResponse, opts ...grpc.CallOption) (*StateQuery, error)
 }
 
 type bridgeClient struct {
@@ -206,25 +206,22 @@ func (c *bridgeClient) Data(ctx context.Context, opts ...grpc.CallOption) (grpc.
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Bridge_DataClient = grpc.ClientStreamingClient[HeadCount, empty.Empty]
 
-func (c *bridgeClient) YourState(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[StateResponse, StateQuery], error) {
+func (c *bridgeClient) YourState(ctx context.Context, in *StateResponse, opts ...grpc.CallOption) (*StateQuery, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &Bridge_ServiceDesc.Streams[1], Bridge_YourState_FullMethodName, cOpts...)
+	out := new(StateQuery)
+	err := c.cc.Invoke(ctx, Bridge_YourState_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &grpc.GenericClientStream[StateResponse, StateQuery]{ClientStream: stream}
-	return x, nil
+	return out, nil
 }
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Bridge_YourStateClient = grpc.BidiStreamingClient[StateResponse, StateQuery]
 
 // BridgeServer is the server API for Bridge service.
 // All implementations must embed UnimplementedBridgeServer
 // for forward compatibility.
 type BridgeServer interface {
 	Data(grpc.ClientStreamingServer[HeadCount, empty.Empty]) error
-	YourState(grpc.BidiStreamingServer[StateResponse, StateQuery]) error
+	YourState(context.Context, *StateResponse) (*StateQuery, error)
 	mustEmbedUnimplementedBridgeServer()
 }
 
@@ -238,8 +235,8 @@ type UnimplementedBridgeServer struct{}
 func (UnimplementedBridgeServer) Data(grpc.ClientStreamingServer[HeadCount, empty.Empty]) error {
 	return status.Errorf(codes.Unimplemented, "method Data not implemented")
 }
-func (UnimplementedBridgeServer) YourState(grpc.BidiStreamingServer[StateResponse, StateQuery]) error {
-	return status.Errorf(codes.Unimplemented, "method YourState not implemented")
+func (UnimplementedBridgeServer) YourState(context.Context, *StateResponse) (*StateQuery, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method YourState not implemented")
 }
 func (UnimplementedBridgeServer) mustEmbedUnimplementedBridgeServer() {}
 func (UnimplementedBridgeServer) testEmbeddedByValue()                {}
@@ -269,12 +266,23 @@ func _Bridge_Data_Handler(srv interface{}, stream grpc.ServerStream) error {
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Bridge_DataServer = grpc.ClientStreamingServer[HeadCount, empty.Empty]
 
-func _Bridge_YourState_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(BridgeServer).YourState(&grpc.GenericServerStream[StateResponse, StateQuery]{ServerStream: stream})
+func _Bridge_YourState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StateResponse)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BridgeServer).YourState(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Bridge_YourState_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BridgeServer).YourState(ctx, req.(*StateResponse))
+	}
+	return interceptor(ctx, in, info, handler)
 }
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Bridge_YourStateServer = grpc.BidiStreamingServer[StateResponse, StateQuery]
 
 // Bridge_ServiceDesc is the grpc.ServiceDesc for Bridge service.
 // It's only intended for direct use with grpc.RegisterService,
@@ -282,17 +290,16 @@ type Bridge_YourStateServer = grpc.BidiStreamingServer[StateResponse, StateQuery
 var Bridge_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "sandbox.Bridge",
 	HandlerType: (*BridgeServer)(nil),
-	Methods:     []grpc.MethodDesc{},
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "YourState",
+			Handler:    _Bridge_YourState_Handler,
+		},
+	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "Data",
 			Handler:       _Bridge_Data_Handler,
-			ClientStreams: true,
-		},
-		{
-			StreamName:    "YourState",
-			Handler:       _Bridge_YourState_Handler,
-			ServerStreams: true,
 			ClientStreams: true,
 		},
 	},

@@ -36,5 +36,5 @@ service Traffic {
 
 service Bridge {
         rpc Data(stream HeadCount) returns (google.protobuf.Empty) {}
-        rpc YourState(stream StateResponse) returns (stream StateQuery) {}
+        rpc YourState(StateResponse) returns (StateQuery) {}
 }
