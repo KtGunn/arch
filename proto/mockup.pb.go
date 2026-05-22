@@ -174,10 +174,11 @@ const file_mockup_proto_rawDesc = "" +
 	"\aPresent\x18\x01 \x01(\tR\aPresent2}\n" +
 	"\aTraffic\x12:\n" +
 	"\tYourState\x12\x13.sandbox.StateQuery\x1a\x16.sandbox.StateResponse\"\x00\x126\n" +
-	"\x04Data\x12\x16.google.protobuf.Empty\x1a\x12.sandbox.HeadCount\"\x000\x012\x80\x01\n" +
+	"\x04Data\x12\x16.google.protobuf.Empty\x1a\x12.sandbox.HeadCount\"\x000\x012\xb2\x01\n" +
 	"\x06Bridge\x126\n" +
-	"\x04Data\x12\x12.sandbox.HeadCount\x1a\x16.google.protobuf.Empty\"\x00(\x01\x12>\n" +
-	"\tYourState\x12\x16.sandbox.StateResponse\x1a\x13.sandbox.StateQuery\"\x00(\x010\x01B\x0eZ\fmockup/protob\x06proto3"
+	"\x04Data\x12\x12.sandbox.HeadCount\x1a\x16.google.protobuf.Empty\"\x00(\x01\x129\n" +
+	"\x03Out\x12\x16.sandbox.StateResponse\x1a\x16.google.protobuf.Empty\"\x00(\x01\x125\n" +
+	"\x02In\x12\x16.google.protobuf.Empty\x1a\x13.sandbox.StateQuery\"\x000\x01B\x0eZ\fmockup/protob\x06proto3"
 
 var (
 	file_mockup_proto_rawDescOnce sync.Once
@@ -202,13 +203,15 @@ var file_mockup_proto_depIdxs = []int32{
 	0, // 0: sandbox.Traffic.YourState:input_type -> sandbox.StateQuery
 	3, // 1: sandbox.Traffic.Data:input_type -> google.protobuf.Empty
 	2, // 2: sandbox.Bridge.Data:input_type -> sandbox.HeadCount
-	1, // 3: sandbox.Bridge.YourState:input_type -> sandbox.StateResponse
-	1, // 4: sandbox.Traffic.YourState:output_type -> sandbox.StateResponse
-	2, // 5: sandbox.Traffic.Data:output_type -> sandbox.HeadCount
-	3, // 6: sandbox.Bridge.Data:output_type -> google.protobuf.Empty
-	0, // 7: sandbox.Bridge.YourState:output_type -> sandbox.StateQuery
-	4, // [4:8] is the sub-list for method output_type
-	0, // [0:4] is the sub-list for method input_type
+	1, // 3: sandbox.Bridge.Out:input_type -> sandbox.StateResponse
+	3, // 4: sandbox.Bridge.In:input_type -> google.protobuf.Empty
+	1, // 5: sandbox.Traffic.YourState:output_type -> sandbox.StateResponse
+	2, // 6: sandbox.Traffic.Data:output_type -> sandbox.HeadCount
+	3, // 7: sandbox.Bridge.Data:output_type -> google.protobuf.Empty
+	3, // 8: sandbox.Bridge.Out:output_type -> google.protobuf.Empty
+	0, // 9: sandbox.Bridge.In:output_type -> sandbox.StateQuery
+	5, // [5:10] is the sub-list for method output_type
+	0, // [0:5] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name

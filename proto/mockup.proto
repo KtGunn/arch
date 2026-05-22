@@ -37,6 +37,8 @@ service Traffic {
 service Bridge {
         rpc Data(stream HeadCount) returns (google.protobuf.Empty) {}
 
-        // 260515 This has to be bidir-streaming!
-        rpc YourState(stream StateResponse) returns (stream StateQuery) {}
+        // 260522 Bridge streams Queries,  pcol streams Responses back
+        rpc Out(stream StateResponse) returns (google.protobuf.Empty) {}
+
+        rpc In(google.protobuf.Empty) returns (stream StateQuery) {}
 }
