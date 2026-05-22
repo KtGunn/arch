@@ -174,10 +174,10 @@ const file_mockup_proto_rawDesc = "" +
 	"\aPresent\x18\x01 \x01(\tR\aPresent2}\n" +
 	"\aTraffic\x12:\n" +
 	"\tYourState\x12\x13.sandbox.StateQuery\x1a\x16.sandbox.StateResponse\"\x00\x126\n" +
-	"\x04Data\x12\x16.google.protobuf.Empty\x1a\x12.sandbox.HeadCount\"\x000\x012|\n" +
+	"\x04Data\x12\x16.google.protobuf.Empty\x1a\x12.sandbox.HeadCount\"\x000\x012\x80\x01\n" +
 	"\x06Bridge\x126\n" +
-	"\x04Data\x12\x12.sandbox.HeadCount\x1a\x16.google.protobuf.Empty\"\x00(\x01\x12:\n" +
-	"\tYourState\x12\x16.sandbox.StateResponse\x1a\x13.sandbox.StateQuery\"\x00B\x0eZ\fmockup/protob\x06proto3"
+	"\x04Data\x12\x12.sandbox.HeadCount\x1a\x16.google.protobuf.Empty\"\x00(\x01\x12>\n" +
+	"\tYourState\x12\x16.sandbox.StateResponse\x1a\x13.sandbox.StateQuery\"\x00(\x010\x01B\x0eZ\fmockup/protob\x06proto3"
 
 var (
 	file_mockup_proto_rawDescOnce sync.Once

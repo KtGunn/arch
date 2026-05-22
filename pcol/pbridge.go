@@ -26,7 +26,7 @@ func EngageBridge(ctx context.Context) int {
 
 	goRoutines := 1
 	go func(ctx context.Context, client pb.BridgeClient){
-		StateQueryStream(ctx, client)
+		StateFroAndTo(ctx, client)
 		wg.Done()
 	}(ctx, BridgeClient.Client)
 	
@@ -105,6 +105,14 @@ func receiveDataStream(ctx context.Context,
 
 }
 
+
+func StateFroAndTo(ctx context.Context, client pb.BridgeClient) error {
+
+	for {
+
+	}
+	
+}
 
 func StateQueryStream(ctx context.Context, client pb.BridgeClient) {
 	for {

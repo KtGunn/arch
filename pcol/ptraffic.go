@@ -46,13 +46,16 @@ func StateToAndFro(ctx context.Context, client pb.TrafficClient) error {
 	for {
 		select {
 		case query := <-stateQyToControls:
+
 			pbQuery := &pb.StateQuery{
 				Ask: query,
 			}
 			stateResponse, err := client.YourState(ctx, pbQuery)
 			if err != nil {
 				log.Println("error querying Controls", err)
+				return err
 			}
+
 			stateResponseToBridge <- stateResponse.Reply
 		}
 	}
