@@ -18,30 +18,19 @@ import (
 type BridgeServerData struct {
 	pb.UnimplementedBridgeServer
 }
-
 func NewBridge() *BridgeServerData {
 	return &BridgeServerData{}
 }
-
 var Bridge *BridgeServerData
 
 
-var stateQuery = make(chan string)
+
+
 
 // LaunchBridge
 //
 func LaunchBridge(port int) {
 
-	// 'Drive' function for testing purposes only.
-	//
-	go func() {
-		for {
-			time.Sleep(3*time.Second)
-			stateQuery<-"This is a query"
-		}
-	}()
-	// --
-	
 	lis, err := net.Listen("tcp",
 		fmt.Sprintf("localhost:%d", port),
 	)
@@ -62,13 +51,15 @@ func LaunchBridge(port int) {
 }
 
 
+
+
 // Data
 // This rpc is CLIENT STREAMING
 // --
 func (s *BridgeServerData) Data(stream pb.Bridge_DataServer) error {
 
 	for {
-		_, err := stream.Recv()
+		in, err := stream.Recv()
 
 		if err == io.EOF {
 			log.Println("Data eof")
@@ -79,7 +70,7 @@ func (s *BridgeServerData) Data(stream pb.Bridge_DataServer) error {
 			return err
 		}
 
-		log.Println(" st<-dt")
+		freshData(in)
 	}
 
 	return nil
@@ -99,7 +90,7 @@ func (s *BridgeServerData) YourState(
 
 	go func(){
 		for {
-			_, err := stream.Recv()
+			reply, err := stream.Recv()
 			if err == io.EOF {
 				log.Println("BS eof", err)
 				return
@@ -108,7 +99,8 @@ func (s *BridgeServerData) YourState(
 				log.Println("BS !nil", err)
 				return
 			}
-			log.Println(" st<-ys")
+
+			stateResponse(reply)
 		}
 
 	}()
@@ -116,17 +108,15 @@ func (s *BridgeServerData) YourState(
 
 	for {
 
-		select
-		{
-		case out := <-stateQuery :
-			outmsg := &pb.StateQuery{
-				Ask: out,
-			}
-			log.Println(" st->ys")
-			stream.Send(outmsg)
+		select  {
+
+		case query := <-BChannels.stateQuery:
+			log.Println(" bs sending a query")
+			stream.Send(query)
 			
 		case <-time.After(10*time.Second):
 			log.Println("bs tick")
+
 		}
 
 	}

@@ -14,6 +14,7 @@ import (
 	"log"
 	"flag"
 	"strconv"
+	"time"
 	"os"
 )
 
@@ -46,5 +47,15 @@ func main() {
 	log.Println("**** Welcome to Bridge ****")
 	port := parseInput()
 
+	go func(){
+		time.Sleep(1*time.Second)
+		log.Println(" Calling do USER")
+		doUser()
+	}()
+
+	BChannels = NewBChannels()
+	BChannels.init()
+	
 	LaunchBridge(port)
+	
 }

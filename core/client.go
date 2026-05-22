@@ -75,7 +75,7 @@ func EngageClient(ctx context.Context) {
 
 	for {
 
-		answer, err := Client.client.YourState(ctx, &pb.StateRequest{
+		answer, err := Client.client.YourState(ctx, &pb.StateQuery{
 			Ask: "State please!",
 		})
 

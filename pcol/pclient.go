@@ -13,16 +13,6 @@ import (
 )
 
 
-// Protocol needs two clients,
-//  client for the 'Controls Server'
-//  client for the 'Bridge Server'
-//
-var (
-	TrafficClient *GRPCClient[pb.TrafficClient]
-	BridgeClient  *GRPCClient[pb.BridgeClient]
-)
-
-
 // Generic GRPC client
 //
 type GRPCClient[T any] struct {
@@ -33,6 +23,33 @@ type GRPCClient[T any] struct {
 }
 
 
+// Protocol needs two clients,
+//  client for the 'Controls Server'
+//  client for the 'Bridge Server'
+//
+var (
+	TrafficClient *GRPCClient[pb.TrafficClient]
+	BridgeClient  *GRPCClient[pb.BridgeClient]
+)
+
+
+// Channels to bridge 'Bridge' and 'Traffic' clients
+//
+var (
+
+	stateQyToControls chan string
+	stateResponseToBridge chan string
+
+	dataToBridge chan string
+)
+
+
+func initChannels() {
+	stateQyToControls = make(chan string)
+	stateResponseToBridge = make(chan string)
+	dataToBridge = make(chan string)
+}
+
 var wg = sync.WaitGroup{}
 
 
@@ -40,6 +57,8 @@ var wg = sync.WaitGroup{}
 //
 func LaunchClients(ctx context.Context, portB int, portC int) {
 	log.Println("Launching clients")
+
+	initChannels()
 
 	BridgeClient = NewGRPCClient(ctx, portB, pb.NewBridgeClient)
 	bridgeGoes := EngageBridge(ctx)
