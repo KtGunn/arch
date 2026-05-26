@@ -5,7 +5,6 @@ import (
 	"context"
 	"time"
 	"io"
-	"fmt"
 
 	"google.golang.org/grpc"
 
@@ -13,11 +12,6 @@ import (
 	 empty "github.com/golang/protobuf/ptypes/empty"
 )
 
-
-var (
-	stateResponse = make(chan string)
-	dataStream = make(chan string)
-)
 
 
 func EngageBridge(ctx context.Context) int {
@@ -37,16 +31,7 @@ func EngageBridge(ctx context.Context) int {
 		wg.Done()
 	}(ctx, BridgeClient.Client)
 
-	go func() {
-		count := 0
-		for {
-			time.Sleep(5 *time.Second)
-			dataStream <- fmt.Sprintf("HCount %d", count)
-			count++
-		}
-	}()
 	return goRoutines
-
 }
 
 
@@ -94,7 +79,7 @@ func receiveDataStream(ctx context.Context,
 
 	for {
 		select {
-		case data := <-dataStream:
+		case data := <-PChannels.dataStream:
 			out := &pb.HeadCount{
 				Present: data,
 			}
@@ -138,7 +123,7 @@ func StateFroAndTo(ctx context.Context, client pb.BridgeClient) error {
 	//
 	for {
 		select {
-		case response := <- PChannels.stateResponse:
+		case response := <- PChannels.stateRespToBridge:
 			stream.Send(&pb.StateResponse{
 				Reply: response,
 			})
