@@ -9,6 +9,13 @@ import (
 
 var wg = sync.WaitGroup{}
 
+
+// This module will
+// 1. create a client to the Bridge Server
+// 2. create a user who will send out Queries
+//    periodically.
+// 3. the user may also request streamed Data
+//
 func main() {
 	log.Println("**** Welcome to Main of Core *****")
 
@@ -22,24 +29,13 @@ func main() {
 	log.Println("port", cfg.port)
 
 	ctx, cancel := context.WithCancel(context.Background())
+	
+	LaunchClient(cfg.port, ctx)
+	log.Println(" The client has been created.")
 
-	switch cfg.role {
-	case "server":
-
-	case "client":
-		LaunchClient(cfg.port, ctx)
-
-	default:
-		log.Fatal("role is wrong! ", cfg.role)
-
-	}
-	log.Println(" -- select --")
-
-	select {
-	case <-time.After(20 * time.Second):
-		log.Println(" time is up")
-		cancel()
-	}
+	howManyQueries := 1
+	receiveStream := false
+	LaunchUser(howManyQueries, receiveStream)
 
 	wg.Wait()
 	log.Println(" All done?")

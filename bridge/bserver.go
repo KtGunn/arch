@@ -6,10 +6,11 @@ import (
 	"log"
 	"net"
 
-	"time"
+	//"time"
 
 	pb "mockup/proto"
 	"google.golang.org/grpc"
+	empty "github.com/golang/protobuf/ptypes/empty"
 )
 
 
@@ -44,7 +45,7 @@ func LaunchBridge(port int) {
 
 	Bridge = NewBridge()
 	pb.RegisterBridgeServer(grpcServer, Bridge)
-	
+
 
 	log.Println("Bridge waiting for data traffic on ", port)
 	grpcServer.Serve(lis)
@@ -77,50 +78,42 @@ func (s *BridgeServerData) Data(stream pb.Bridge_DataServer) error {
 }
 
 
-// YourState
 // This rpc passes,.
 //
-//	StateRequest server->client and
-//	 StateResponse client<-server
+//	StateQuery -> client
 // --
-func (s *BridgeServerData) YourState(
-	stream grpc.BidiStreamingServer[pb.StateResponse, pb.StateQuery]) error {
-
-	log.Println("BR in YourState")
-
-	go func(){
-		for {
-			reply, err := stream.Recv()
-			if err == io.EOF {
-				log.Println("BS eof", err)
-				return
-			}
-			if err != nil {
-				log.Println("BS !nil", err)
-				return
-			}
-
-			stateResponse(reply)
-		}
-
-	}()
-
+func (s *BridgeServerData) In(stream pb.Bridge_InServer) error {
 
 	for {
-
-		select  {
-
-		case query := <-BChannels.stateQuery:
-			log.Println(" bs sending a query")
-			stream.Send(query)
-			
-		case <-time.After(10*time.Second):
-			log.Println("bs tick")
-
+		resp, err := stream.Recv()
+		if err != nil {
+			log.Println("error on receiving response stream")
 		}
-
+		
+		BChannels.stateResponse <- resp.Reply
 	}
+	return nil
+
+}
+
+
+// This rpc passes,.
+//
+//	StateResponse <- client
+// --
+func (s *BridgeServerData) Out(qy *empty.Empty,
+	stream grpc.ServerStreamingServer[pb.StateQuery]) error {
 	
+	for {
+		select {
+		case state := <-BChannels.stateQuery:
+			log.Println("Bridge sending state to client")
+			qy := &pb.StateQuery{
+				Ask: state,
+			}
+			stream.Send(qy)
+		}
+	}
 
 	return nil
 }

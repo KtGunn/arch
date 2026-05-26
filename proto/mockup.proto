@@ -38,7 +38,7 @@ service Bridge {
         rpc Data(stream HeadCount) returns (google.protobuf.Empty) {}
 
         // 260522 Bridge streams Queries,  pcol streams Responses back
-        rpc Out(stream StateResponse) returns (google.protobuf.Empty) {}
+        rpc In(stream StateResponse) returns (google.protobuf.Empty) {}
 
-        rpc In(google.protobuf.Empty) returns (stream StateQuery) {}
+        rpc Out(google.protobuf.Empty) returns (stream StateQuery) {}
 }

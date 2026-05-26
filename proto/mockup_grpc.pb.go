@@ -174,8 +174,8 @@ var Traffic_ServiceDesc = grpc.ServiceDesc{
 
 const (
 	Bridge_Data_FullMethodName = "/sandbox.Bridge/Data"
-	Bridge_Out_FullMethodName  = "/sandbox.Bridge/Out"
 	Bridge_In_FullMethodName   = "/sandbox.Bridge/In"
+	Bridge_Out_FullMethodName  = "/sandbox.Bridge/Out"
 )
 
 // BridgeClient is the client API for Bridge service.
@@ -184,8 +184,8 @@ const (
 type BridgeClient interface {
 	Data(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[HeadCount, empty.Empty], error)
 	// 260522 Bridge streams Queries,  pcol streams Responses back
-	Out(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[StateResponse, empty.Empty], error)
-	In(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[StateQuery], error)
+	In(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[StateResponse, empty.Empty], error)
+	Out(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[StateQuery], error)
 }
 
 type bridgeClient struct {
@@ -209,9 +209,9 @@ func (c *bridgeClient) Data(ctx context.Context, opts ...grpc.CallOption) (grpc.
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Bridge_DataClient = grpc.ClientStreamingClient[HeadCount, empty.Empty]
 
-func (c *bridgeClient) Out(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[StateResponse, empty.Empty], error) {
+func (c *bridgeClient) In(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[StateResponse, empty.Empty], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &Bridge_ServiceDesc.Streams[1], Bridge_Out_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &Bridge_ServiceDesc.Streams[1], Bridge_In_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -220,11 +220,11 @@ func (c *bridgeClient) Out(ctx context.Context, opts ...grpc.CallOption) (grpc.C
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Bridge_OutClient = grpc.ClientStreamingClient[StateResponse, empty.Empty]
+type Bridge_InClient = grpc.ClientStreamingClient[StateResponse, empty.Empty]
 
-func (c *bridgeClient) In(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[StateQuery], error) {
+func (c *bridgeClient) Out(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[StateQuery], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &Bridge_ServiceDesc.Streams[2], Bridge_In_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &Bridge_ServiceDesc.Streams[2], Bridge_Out_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -239,7 +239,7 @@ func (c *bridgeClient) In(ctx context.Context, in *empty.Empty, opts ...grpc.Cal
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Bridge_InClient = grpc.ServerStreamingClient[StateQuery]
+type Bridge_OutClient = grpc.ServerStreamingClient[StateQuery]
 
 // BridgeServer is the server API for Bridge service.
 // All implementations must embed UnimplementedBridgeServer
@@ -247,8 +247,8 @@ type Bridge_InClient = grpc.ServerStreamingClient[StateQuery]
 type BridgeServer interface {
 	Data(grpc.ClientStreamingServer[HeadCount, empty.Empty]) error
 	// 260522 Bridge streams Queries,  pcol streams Responses back
-	Out(grpc.ClientStreamingServer[StateResponse, empty.Empty]) error
-	In(*empty.Empty, grpc.ServerStreamingServer[StateQuery]) error
+	In(grpc.ClientStreamingServer[StateResponse, empty.Empty]) error
+	Out(*empty.Empty, grpc.ServerStreamingServer[StateQuery]) error
 	mustEmbedUnimplementedBridgeServer()
 }
 
@@ -262,11 +262,11 @@ type UnimplementedBridgeServer struct{}
 func (UnimplementedBridgeServer) Data(grpc.ClientStreamingServer[HeadCount, empty.Empty]) error {
 	return status.Errorf(codes.Unimplemented, "method Data not implemented")
 }
-func (UnimplementedBridgeServer) Out(grpc.ClientStreamingServer[StateResponse, empty.Empty]) error {
-	return status.Errorf(codes.Unimplemented, "method Out not implemented")
-}
-func (UnimplementedBridgeServer) In(*empty.Empty, grpc.ServerStreamingServer[StateQuery]) error {
+func (UnimplementedBridgeServer) In(grpc.ClientStreamingServer[StateResponse, empty.Empty]) error {
 	return status.Errorf(codes.Unimplemented, "method In not implemented")
+}
+func (UnimplementedBridgeServer) Out(*empty.Empty, grpc.ServerStreamingServer[StateQuery]) error {
+	return status.Errorf(codes.Unimplemented, "method Out not implemented")
 }
 func (UnimplementedBridgeServer) mustEmbedUnimplementedBridgeServer() {}
 func (UnimplementedBridgeServer) testEmbeddedByValue()                {}
@@ -296,23 +296,23 @@ func _Bridge_Data_Handler(srv interface{}, stream grpc.ServerStream) error {
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Bridge_DataServer = grpc.ClientStreamingServer[HeadCount, empty.Empty]
 
-func _Bridge_Out_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(BridgeServer).Out(&grpc.GenericServerStream[StateResponse, empty.Empty]{ServerStream: stream})
+func _Bridge_In_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(BridgeServer).In(&grpc.GenericServerStream[StateResponse, empty.Empty]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Bridge_OutServer = grpc.ClientStreamingServer[StateResponse, empty.Empty]
+type Bridge_InServer = grpc.ClientStreamingServer[StateResponse, empty.Empty]
 
-func _Bridge_In_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _Bridge_Out_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(empty.Empty)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(BridgeServer).In(m, &grpc.GenericServerStream[empty.Empty, StateQuery]{ServerStream: stream})
+	return srv.(BridgeServer).Out(m, &grpc.GenericServerStream[empty.Empty, StateQuery]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Bridge_InServer = grpc.ServerStreamingServer[StateQuery]
+type Bridge_OutServer = grpc.ServerStreamingServer[StateQuery]
 
 // Bridge_ServiceDesc is the grpc.ServiceDesc for Bridge service.
 // It's only intended for direct use with grpc.RegisterService,
@@ -328,13 +328,13 @@ var Bridge_ServiceDesc = grpc.ServiceDesc{
 			ClientStreams: true,
 		},
 		{
-			StreamName:    "Out",
-			Handler:       _Bridge_Out_Handler,
+			StreamName:    "In",
+			Handler:       _Bridge_In_Handler,
 			ClientStreams: true,
 		},
 		{
-			StreamName:    "In",
-			Handler:       _Bridge_In_Handler,
+			StreamName:    "Out",
+			Handler:       _Bridge_Out_Handler,
 			ServerStreams: true,
 		},
 	},
