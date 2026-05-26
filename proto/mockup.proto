@@ -21,6 +21,10 @@ message StateResponse {
         string reply = 1;
 }
 
+message Id {
+        string name = 1;
+        int32 id = 2;
+}
 
 message HeadCount {
         string Present = 1;
@@ -32,6 +36,8 @@ service Traffic {
 
         // Server streaming data
         rpc Data(google.protobuf.Empty) returns (stream  HeadCount) {}
+
+        rpc Identiciation(Id) returns (google.protobuf.Empty) {}
 }
 
 service Bridge {

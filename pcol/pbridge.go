@@ -93,11 +93,26 @@ func receiveDataStream(ctx context.Context,
 
 func StateFroAndTo(ctx context.Context, client pb.BridgeClient) error {
 
-	stream, err := client.YourState(ctx)
-	if err != nil {
-		log.Println("failed to open state stream:", err)
-		return err
+	var stream grpc.BidiStreamingClient[pb.StateResponse,pb.StateQuery]
+	var err error
+	
+	for {
+		stream, err = client.YourState(ctx)
+
+		if err == io.EOF {
+			log.Println(" state stream is done!")
+			return err
+		}
+
+		if err != nil {
+			log.Println("No bridge stream yet...")
+			time.Sleep(3*time.Second)
+
+		} else {
+			break
+		}
 	}
+	
 
 	//
 	// State Query
