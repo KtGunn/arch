@@ -88,6 +88,9 @@ func (s *BridgeServerData) YourState(
 
 	log.Println("BR in YourState")
 
+	//
+	// State Response
+	//
 	go func(){
 		for {
 			reply, err := stream.Recv()
@@ -106,13 +109,20 @@ func (s *BridgeServerData) YourState(
 	}()
 
 
+
+	//
+	// State Query
+	//
 	for {
 
 		select  {
 
 		case query := <-BChannels.stateQuery:
 			log.Println(" bs sending a query")
-			stream.Send(query)
+
+			stream.Send(&pb.StateQuery{
+				Ask: query,
+			})
 			
 		case <-time.After(10*time.Second):
 			log.Println("bs tick")

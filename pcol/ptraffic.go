@@ -45,7 +45,7 @@ func StateToAndFro(ctx context.Context, client pb.TrafficClient) error {
 
 	for {
 		select {
-		case query := <-stateQyToControls:
+		case query := <-PChannels.stateQyToControls:
 
 			pbQuery := &pb.StateQuery{
 				Ask: query,
@@ -56,7 +56,7 @@ func StateToAndFro(ctx context.Context, client pb.TrafficClient) error {
 				return err
 			}
 
-			stateResponseToBridge <- stateResponse.Reply
+			registerAResponse(stateResponse.Reply)
 		}
 	}
 }
@@ -99,7 +99,9 @@ func Data(ctx context.Context, client pb.TrafficClient) {
 		case <-ctx.Done():
 			return
 		default:
-			// we go on
+			// pass to bridge client
+			freshData(headCount.Present)
+
 		}
 	}
 }
