@@ -18,6 +18,11 @@ func main() {
 	log.Println("bridge at", cfg.bridgePort, "controls at", cfg.controlsPort)
 	ctx, _ := context.WithCancel(context.Background())
 
+
+	PChannels = NewPChannels()
+	PChannels.init()
+
+
 	LaunchClients(ctx, cfg.bridgePort, cfg.controlsPort)
 
 	log.Println(" All done?")

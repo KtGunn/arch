@@ -5,7 +5,7 @@ import (
 	"context"
 	"time"
 	"io"
-	"fmt"	
+	"fmt"
 
 	"google.golang.org/grpc"
 
@@ -29,7 +29,7 @@ func EngageBridge(ctx context.Context) int {
 		StateFroAndTo(ctx, client)
 		wg.Done()
 	}(ctx, BridgeClient.Client)
-	
+
 
 	goRoutines++
 	go func(ctx context.Context, client pb.BridgeClient){
@@ -56,7 +56,7 @@ func DataStream(ctx context.Context, client pb.BridgeClient) {
 
 		var stream grpc.ClientStreamingClient[pb.HeadCount, empty.Empty]
 		var closed bool
-		
+
 		stream, closed = openDataStream(ctx,client)
 		if closed {
 			log.Println("Data Open Context is closed, Bye...")
@@ -72,14 +72,14 @@ func DataStream(ctx context.Context, client pb.BridgeClient) {
 }
 
 func openDataStream(ctx context.Context,	client pb.BridgeClient) (grpc.ClientStreamingClient[pb.HeadCount, empty.Empty], bool) {
-	
+
 	for {
-		
+
 		stream, err := client.Data(ctx)
 		if err == nil {
 			return stream, false
 		}
-		
+
 		select {
 		case <-ctx.Done():
 			return nil, true
@@ -91,7 +91,7 @@ func openDataStream(ctx context.Context,	client pb.BridgeClient) (grpc.ClientStr
 
 func receiveDataStream(ctx context.Context,
 	stream grpc.ClientStreamingClient[pb.HeadCount, empty.Empty]) bool {
-	
+
 	for {
 		select {
 		case data := <-dataStream:
@@ -108,95 +108,45 @@ func receiveDataStream(ctx context.Context,
 
 func StateFroAndTo(ctx context.Context, client pb.BridgeClient) error {
 
-	for {
-
+	stream, err := client.YourState(ctx)
+	if err != nil {
+		log.Println("failed to open state stream:", err)
+		return err
 	}
-	
-}
 
-func StateQueryStream(ctx context.Context, client pb.BridgeClient) {
-	for {
-		log.Println("Opening the data stream...")
-
-		
-		var stream grpc.BidiStreamingClient[pb.StateResponse,pb.StateQuery]
-		var closed bool
-
-		stream, closed = openStateStream(ctx, client)
-		if closed {
-			log.Println(" Data context closed ")
-			return
-		}
-
-		closed = doStateStream(ctx, stream)
-		if closed {
-			log.Println(" Receive context closed ")
-			return
-		}
-	}
-}
-
-
-// openStateStream
-//
-func openStateStream(ctx context.Context,
-	client pb.BridgeClient) (grpc.BidiStreamingClient[pb.StateResponse,pb.StateQuery], bool) {
-	
-	for {
-		
-		stream, err := client.YourState(ctx)
-		if err == nil {
-			return stream, false
-		}
-		
-		select {
-		case <-ctx.Done():
-			return nil, true
-		case <-time.After(5*time.Second):
-			// we go on
-		}
-	}
-}
-
-func doStateStream(ctx context.Context,
-	stream grpc.BidiStreamingClient[pb.StateResponse,pb.StateQuery]) bool {
-	
+	//
+	// State Query
+	//
 	go func() {
 		for {
 			query, err := stream.Recv()
-			
 			if err == io.EOF {
-				log.Println("BS eof", err)
+				log.Println("...State query stream EOF")
 				return
 			}
 			if err != nil {
-				log.Println("state response stream error", err)
+				log.Println("...State query stream !nil")
 				return
 			}
-			
-			log.Println("pBb recv:" , query)
-
-			stateResponse<-"Here's your retort!"
+			log.Println(" Received query", query.Ask)
+			postAQuery(query.Ask)
 		}
 	}()
-	
+
+	//
+	// State Response
+	//
 	for {
-		
-		select
-		{
-		case out := <-stateResponse :
-			outmsg := &pb.StateResponse{
-				Reply: out,
-			}
-			stream.Send(outmsg)
-			
-		case <-ctx.Done():
-			return true
+		select {
+		case response := <- PChannels.stateResponse:
+			stream.Send(&pb.StateResponse{
+				Reply: response,
+			})
 
-		case <-time.After(12*time.Second):
-			log.Println("..pbridge tick")
+		case <-time.After(7*time.Second):
+			log.Println(" bs tick")
 		}
-		
 	}
-
 }
+
+
