@@ -32,7 +32,6 @@ func EngageTraffic(ctx context.Context) int {
 	}(ctx, TrafficClient.Client)
 
 	return goRoutines
-
 }
 
 
@@ -46,17 +45,13 @@ func StateToAndFro(ctx context.Context, client pb.TrafficClient) error {
 	for {
 		select {
 		case query := <-PChannels.stateQyToControls:
-
-			pbQuery := &pb.StateQuery{
-				Ask: query,
-			}
-			stateResponse, err := client.YourState(ctx, pbQuery)
+			stateResponse, err := client.YourState(ctx, query)
 			if err != nil {
 				log.Println("error querying Controls", err)
 				return err
 			}
 
-			registerAResponse(stateResponse.Reply)
+			registerAResponse(stateResponse)
 		}
 	}
 }
@@ -104,9 +99,7 @@ func Data(ctx context.Context, client pb.TrafficClient) {
 		case <-ctx.Done():
 			return
 		default:
-			// pass to bridge client
-			freshData(headCount.Present)
-
+			freshData(headCount)
 		}
 	}
 }

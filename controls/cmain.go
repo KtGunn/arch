@@ -8,15 +8,15 @@ import (
 
 
 const usage = `
-./controls <port>
+./controls <port> <identifier(str)>
 `
 
-func parseInput() int {
+func parseInput() (int, string) {
 
 	flag.Parse()
 
 	positionalArgs := flag.Args()
-	if len(positionalArgs) != 1 {
+	if len(positionalArgs) != 2 {
 		log.Fatal(usage)
 	}
 	
@@ -24,12 +24,16 @@ func parseInput() int {
 	if err != nil {
 		log.Fatal("You must enter a legit port number!")
 	}
-	return port
+
+	id := positionalArgs[1]
+
+	return port, id
 }
 
 func main () {
 	log.Println("**** Welcome to Main of Controls *****")
-	port := parseInput()
 
-	LaunchServer(port)
+	port, id := parseInput()
+
+	LaunchServer(port, id)
 }

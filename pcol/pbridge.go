@@ -80,10 +80,7 @@ func receiveDataStream(ctx context.Context,
 	for {
 		select {
 		case data := <-PChannels.dataStream:
-			out := &pb.HeadCount{
-				Present: data,
-			}
-			stream.Send(out)
+			stream.Send(data)
 		default:
 		}
 	}
@@ -128,8 +125,8 @@ func StateFroAndTo(ctx context.Context, client pb.BridgeClient) error {
 				log.Println("...State query stream !nil")
 				return
 			}
-			log.Println(" Received query", query.Ask)
-			postAQuery(query.Ask)
+			log.Println(" Received query", query)
+			postAQuery(query)
 		}
 	}()
 
@@ -139,9 +136,7 @@ func StateFroAndTo(ctx context.Context, client pb.BridgeClient) error {
 	for {
 		select {
 		case response := <- PChannels.stateRespToBridge:
-			stream.Send(&pb.StateResponse{
-				Reply: response,
-			})
+			stream.Send(response)
 
 		case <-time.After(7*time.Second):
 			log.Println(" bs tick")

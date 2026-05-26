@@ -125,10 +125,7 @@ func (s *BridgeServerData) YourState(
 
 		case query := <-BChannels.stateQuery:
 			log.Println(" bs sending a query")
-
-			stream.Send(&pb.StateQuery{
-				Ask: query,
-			})
+			stream.Send(query)
 			
 		case <-time.After(10*time.Second):
 			log.Println("bs tick")
