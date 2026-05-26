@@ -5,7 +5,8 @@ import (
 	"io"
 	"log"
 	"net"
-
+	"sync"
+	
 	"time"
 
 	pb "mockup/proto"
@@ -17,10 +18,13 @@ import (
 //
 type BridgeServerData struct {
 	pb.UnimplementedBridgeServer
+	Connections sync.Map
 }
+
 func NewBridge() *BridgeServerData {
 	return &BridgeServerData{}
 }
+
 var Bridge *BridgeServerData
 
 
@@ -57,6 +61,8 @@ func LaunchBridge(port int) {
 // This rpc is CLIENT STREAMING
 // --
 func (s *BridgeServerData) Data(stream pb.Bridge_DataServer) error {
+
+	log.Printf("New stream: %+v", stream)
 
 	for {
 		in, err := stream.Recv()

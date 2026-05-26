@@ -25,8 +25,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Traffic_YourState_FullMethodName = "/sandbox.Traffic/YourState"
-	Traffic_Data_FullMethodName      = "/sandbox.Traffic/Data"
+	Traffic_YourState_FullMethodName     = "/sandbox.Traffic/YourState"
+	Traffic_Data_FullMethodName          = "/sandbox.Traffic/Data"
+	Traffic_Identiciation_FullMethodName = "/sandbox.Traffic/Identiciation"
 )
 
 // TrafficClient is the client API for Traffic service.
@@ -37,6 +38,7 @@ type TrafficClient interface {
 	YourState(ctx context.Context, in *StateQuery, opts ...grpc.CallOption) (*StateResponse, error)
 	// Server streaming data
 	Data(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[HeadCount], error)
+	Identiciation(ctx context.Context, in *Id, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type trafficClient struct {
@@ -76,6 +78,16 @@ func (c *trafficClient) Data(ctx context.Context, in *empty.Empty, opts ...grpc.
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Traffic_DataClient = grpc.ServerStreamingClient[HeadCount]
 
+func (c *trafficClient) Identiciation(ctx context.Context, in *Id, opts ...grpc.CallOption) (*empty.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, Traffic_Identiciation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TrafficServer is the server API for Traffic service.
 // All implementations must embed UnimplementedTrafficServer
 // for forward compatibility.
@@ -84,6 +96,7 @@ type TrafficServer interface {
 	YourState(context.Context, *StateQuery) (*StateResponse, error)
 	// Server streaming data
 	Data(*empty.Empty, grpc.ServerStreamingServer[HeadCount]) error
+	Identiciation(context.Context, *Id) (*empty.Empty, error)
 	mustEmbedUnimplementedTrafficServer()
 }
 
@@ -99,6 +112,9 @@ func (UnimplementedTrafficServer) YourState(context.Context, *StateQuery) (*Stat
 }
 func (UnimplementedTrafficServer) Data(*empty.Empty, grpc.ServerStreamingServer[HeadCount]) error {
 	return status.Errorf(codes.Unimplemented, "method Data not implemented")
+}
+func (UnimplementedTrafficServer) Identiciation(context.Context, *Id) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Identiciation not implemented")
 }
 func (UnimplementedTrafficServer) mustEmbedUnimplementedTrafficServer() {}
 func (UnimplementedTrafficServer) testEmbeddedByValue()                 {}
@@ -150,6 +166,24 @@ func _Traffic_Data_Handler(srv interface{}, stream grpc.ServerStream) error {
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Traffic_DataServer = grpc.ServerStreamingServer[HeadCount]
 
+func _Traffic_Identiciation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Id)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TrafficServer).Identiciation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Traffic_Identiciation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TrafficServer).Identiciation(ctx, req.(*Id))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Traffic_ServiceDesc is the grpc.ServiceDesc for Traffic service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -160,6 +194,10 @@ var Traffic_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "YourState",
 			Handler:    _Traffic_YourState_Handler,
+		},
+		{
+			MethodName: "Identiciation",
+			Handler:    _Traffic_Identiciation_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

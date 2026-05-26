@@ -71,12 +71,17 @@ func Data(ctx context.Context, client pb.TrafficClient) {
 	for {
 		stream, err = client.Data(ctx, nul)
 
-		if err == nil {
-			log.Println("Br.client has a data stream")
+		if err == io.EOF {
+			log.Println("Control stream done.")
+			return
+		}
+		
+		if err != nil {
+			log.Println("No control stream yet...")
+			time.Sleep(3*time.Second)
+		} else {
 			break
 		}
-
-		time.Sleep(3*time.Second)
 	}
 
 
