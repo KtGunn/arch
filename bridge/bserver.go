@@ -76,6 +76,7 @@ func (s *BridgeServerData) Data(stream pb.Bridge_DataServer) error {
 			return err
 		}
 
+		log.Printf("data: ID %s stream %+v\n", in.Id, stream)
 		freshData(in)
 	}
 
@@ -92,8 +93,7 @@ func (s *BridgeServerData) Data(stream pb.Bridge_DataServer) error {
 func (s *BridgeServerData) YourState(
 	stream grpc.BidiStreamingServer[pb.StateResponse, pb.StateQuery]) error {
 
-	log.Println("BR in YourState")
-
+	log.Printf("New State stream: %+v\n", stream)
 	//
 	// State Response
 	//
@@ -109,6 +109,7 @@ func (s *BridgeServerData) YourState(
 				return
 			}
 
+			log.Printf("state: ID %s stream %+v\n", reply.Id, stream)
 			stateResponse(reply)
 		}
 
