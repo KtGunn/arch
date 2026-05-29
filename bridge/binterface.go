@@ -42,17 +42,17 @@ func (s *BridgeServerChannels) init() {
 }
 
 func freshData(data *pb.HeadCount, id string) {
-	log.Println(id, "Data", data)
+	log.Println(id, "Data:", data)
 }
 
 
 func stateResponse(reply *pb.StateResponse, id string) {
-	log.Println(id, "REGISTERING a response:", reply)
+	log.Println(id, reply)
 	BChannels.stateResponse <- reply
 }
 
 func postAStateQuery(ask *pb.StateQuery) {
-	log.Println("...POSTING a query:", ask)
+	log.Println(ask, "->")
 
 	BChannels.stateQuery <- ask
 }

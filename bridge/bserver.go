@@ -72,7 +72,7 @@ func LaunchBridge(port int) {
 // This rpc is CLIENT STREAMING
 // --
 func (s *BridgeServerData) Data(stream pb.Bridge_DataServer) error {
-	log.Printf("New stream: %+v", stream)
+	log.Printf(":: Data stream: %+v", stream)
 	
 	var ok bool
 	var md map[string][]string
@@ -103,7 +103,6 @@ func (s *BridgeServerData) Data(stream pb.Bridge_DataServer) error {
 			return err
 		}
 
-		log.Printf("data: ID %s stream %+v\n", in, stream)
 		freshData(in, identity)
 	}
 
@@ -119,8 +118,8 @@ func (s *BridgeServerData) Data(stream pb.Bridge_DataServer) error {
 // --
 func (s *BridgeServerData) YourState(
 	stream grpc.BidiStreamingServer[pb.StateResponse, pb.StateQuery]) error {
+	log.Printf(":: State stream: %+v", stream)
 
-	log.Printf("New State stream: %+v\n", stream)
 
 	var ok bool
 	var md map[string][]string
