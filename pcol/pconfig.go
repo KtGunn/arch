@@ -8,11 +8,12 @@ import (
 
 type Config struct {
 	bridgePort int
-	controlsPort int
+	logicPort  int
+	logicId    string
 }
 
 const usage = `
-./pcol <bridgeport> <clientport>
+./pcol <bridgeport> <logicport> <logicid>
 `
 
 func parseArgs(cfg Config) Config {
@@ -21,12 +22,12 @@ func parseArgs(cfg Config) Config {
 	flag.Parse()
 	positionalArgs := flag.Args()
 
-	if len(positionalArgs) != 2 {
+	if len(positionalArgs) != 3 {
 		log.Fatal("You must enter two ports")
 	}
 
 	var err error
-	args := []*int{&cfg.bridgePort, &cfg.controlsPort}
+	args := []*int{&cfg.bridgePort, &cfg.logicPort}
 
 	for n, arg := range args {
 		*arg, err = strconv.Atoi(positionalArgs[n])
@@ -34,6 +35,7 @@ func parseArgs(cfg Config) Config {
 			log.Fatalf("Invalid port number: %v", err)
 		}
 	}
-
+	cfg.logicId = positionalArgs[2]
+	
 	return cfg
 }

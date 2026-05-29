@@ -18,13 +18,11 @@ message StateQuery {
         string ask = 1;
 }
 message StateResponse {
-        string id  = 1;   
         string reply = 2;
 }
 
 
 message HeadCount {
-        string id  = 1;
         string Present = 2;
 }
 

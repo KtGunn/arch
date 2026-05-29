@@ -53,7 +53,7 @@ func main() {
 		LaunchBridge(port)
 	}()
 
-	addUser("fui",1)
+	addUser("MrFoo",1)
 	launchUser(1,100)
 	
 }

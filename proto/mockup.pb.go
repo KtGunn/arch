@@ -74,7 +74,6 @@ func (x *StateQuery) GetAsk() string {
 
 type StateResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Reply         string                 `protobuf:"bytes,2,opt,name=reply,proto3" json:"reply,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -110,13 +109,6 @@ func (*StateResponse) Descriptor() ([]byte, []int) {
 	return file_mockup_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *StateResponse) GetId() string {
-	if x != nil {
-		return x.Id
-	}
-	return ""
-}
-
 func (x *StateResponse) GetReply() string {
 	if x != nil {
 		return x.Reply
@@ -126,7 +118,6 @@ func (x *StateResponse) GetReply() string {
 
 type HeadCount struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Present       string                 `protobuf:"bytes,2,opt,name=Present,proto3" json:"Present,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -162,13 +153,6 @@ func (*HeadCount) Descriptor() ([]byte, []int) {
 	return file_mockup_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *HeadCount) GetId() string {
-	if x != nil {
-		return x.Id
-	}
-	return ""
-}
-
 func (x *HeadCount) GetPresent() string {
 	if x != nil {
 		return x.Present
@@ -183,12 +167,10 @@ const file_mockup_proto_rawDesc = "" +
 	"\fmockup.proto\x12\asandbox\x1a\x1bgoogle/protobuf/empty.proto\"\x1e\n" +
 	"\n" +
 	"StateQuery\x12\x10\n" +
-	"\x03ask\x18\x01 \x01(\tR\x03ask\"5\n" +
-	"\rStateResponse\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
-	"\x05reply\x18\x02 \x01(\tR\x05reply\"5\n" +
-	"\tHeadCount\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
+	"\x03ask\x18\x01 \x01(\tR\x03ask\"%\n" +
+	"\rStateResponse\x12\x14\n" +
+	"\x05reply\x18\x02 \x01(\tR\x05reply\"%\n" +
+	"\tHeadCount\x12\x18\n" +
 	"\aPresent\x18\x02 \x01(\tR\aPresent2}\n" +
 	"\aTraffic\x12:\n" +
 	"\tYourState\x12\x13.sandbox.StateQuery\x1a\x16.sandbox.StateResponse\"\x00\x126\n" +

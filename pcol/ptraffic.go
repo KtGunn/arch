@@ -11,6 +11,7 @@ import (
 	empty "github.com/golang/protobuf/ptypes/empty"
 )
 
+var TrafficID string
 
 // EngageTraffic
 // The function launches go routines to capture
@@ -63,23 +64,24 @@ func Data(ctx context.Context, client pb.TrafficClient) {
 	var err error
 	nul := &empty.Empty{}
 
+	log.Println(" top of Data(ctx,client)...")
+
 	for {
 		stream, err = client.Data(ctx, nul)
-
 		if err == io.EOF {
 			log.Println("Control stream done.")
 			return
 		}
-		
 		if err != nil {
 			log.Println("No control stream yet...")
 			time.Sleep(3*time.Second)
-		} else {
-			break
+			continue
 		}
+		break
 	}
 
 
+	log.Println(" stream to Traffic is established...")
 	for {
 
 		headCount, err := stream.Recv()
