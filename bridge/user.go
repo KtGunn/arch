@@ -51,7 +51,7 @@ func launchUser(id int, howManyQueries int) {
 
 	n := 0
 	for {
-		for key, _ := range Clients {
+		for key, _ := range newClients {
 			// Later: for key, value := range Clients {}
 			doQuery(&pb.StateQuery{
 				Ask: fmt.Sprintf("qy.%d->%s", n, key),

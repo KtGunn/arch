@@ -32,11 +32,6 @@ var Bridge *BridgeServerData
 
 var once sync.Once
 
-// CLIENTS LIST
-//
-var (
-	Clients map[string]grpc.BidiStreamingServer[pb.StateResponse, pb.StateQuery]
-)
 
 
 
@@ -59,8 +54,6 @@ func LaunchBridge(port int) {
 	pb.RegisterBridgeServer(grpcServer, Bridge)
 	
 
-	Clients = make(map[string]grpc.BidiStreamingServer[pb.StateResponse, pb.StateQuery])
-	
 	log.Println("Bridge waiting for data traffic on ", port)
 	grpcServer.Serve(lis)
 }
@@ -134,7 +127,8 @@ func (s *BridgeServerData) YourState(
 		log.Fatalf("no identity from stream: %+v", md)
 	}
 	identity = t[0]
-	addStateQueryClient(identity, stream)	
+
+	addClient(identity, "stateQy", stream)	
 
 	once.Do(pcolIsConnected)
 
@@ -181,19 +175,4 @@ func (s *BridgeServerData) YourState(
 	return nil
 }
 
-func addStateQueryClient(
-	id string,
-	stream grpc.BidiStreamingServer[pb.StateResponse,pb.StateQuery]) {
-
-	var strm grpc.BidiStreamingServer[pb.StateResponse,pb.StateQuery]
-	var ok bool
-
-	strm, ok = Clients[id]
-	if !ok {
-		log.Println(" we're adding ", id, "for state queries")
-		Clients[id] = strm
-	} else {
-		log.Println( id, "is knwon to us")
-	}
-}
 
