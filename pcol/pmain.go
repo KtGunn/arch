@@ -3,27 +3,33 @@ package main
 import (
 	"context"
 	"log"
+	"mockup/pcol/logic"
 )
 
 
 func main() {
 	log.Println("**** Welcome to Pcol/Controls I/F *****")
 
-	cfg := Config{
-		controlsPort: 9067,
+	cfg := parseArgs(Config{
+		logicPort:  9067,
 		bridgePort: 6907,
-	}
-	cfg = parseArgs(cfg)
+		logicId:    "dunno",
+	})
 
-	log.Println("bridge at", cfg.bridgePort, "controls at", cfg.controlsPort)
-	ctx, _ := context.WithCancel(context.Background())
-
+	log.Println("bridge at", cfg.bridgePort, "controls at", cfg.logicPort)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	PChannels = NewPChannels()
 	PChannels.init()
 
+	ready := make(chan struct{})
+	go func() {
+		logic.RunLogic(cfg.logicPort, cfg.logicId, ready)
+	}()
 
-	LaunchClients(ctx, cfg.bridgePort, cfg.controlsPort)
+	<-ready
+	LaunchClients(ctx, cfg.bridgePort, cfg.logicPort, cfg.logicId)
 
 	log.Println(" All done?")
 }

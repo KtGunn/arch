@@ -38,11 +38,11 @@ var wg = sync.WaitGroup{}
 
 // LaunchClient
 //
-func LaunchClients(ctx context.Context, portB int, portC int) {
+func LaunchClients(ctx context.Context, portB int, portC int, id string) {
 	log.Println("Launching clients")
 
 	BridgeClient = NewGRPCClient(ctx, portB, pb.NewBridgeClient)
-	bridgeGoes := EngageBridge(ctx)
+	bridgeGoes := EngageBridge(ctx, id)
 	wg.Add(bridgeGoes)
 
 	TrafficClient = NewGRPCClient(ctx, portC, pb.NewTrafficClient)
@@ -67,7 +67,7 @@ func NewGRPCClient[T any](ctx context.Context, port int, newClient func(grpc.Cli
 		log.Fatalf("failed to launch client at %s: %v", address, err)
 	}
 
-	log.Printf("Client connected at %s", address)
+	log.Printf("Client connects at %s", address)
 	return &GRPCClient[T]{
 		Client:  newClient(conn),
 		conn:    conn,

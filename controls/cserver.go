@@ -34,6 +34,8 @@ var (
 	responseChan chan string
 )
 
+var ID string
+
 func InitChannels() {
 	dataChan = make(chan string)
 	responseChan = make(chan string)
@@ -43,8 +45,10 @@ func InitChannels() {
 
 
 // LaunchServer
-func LaunchServer(port int) {
+func LaunchServer(port int, id string) {
 
+	ID = id
+	
 	lis, err := net.Listen("tcp",
 		fmt.Sprintf("localhost:%d", port),
 	)
@@ -87,6 +91,7 @@ func (s *ControlServerType) Data(_ *empty.Empty, stream pb.Traffic_DataServer) e
 	case message := <-dataChan:
 		log.Println(" data got message")
 		data := &pb.HeadCount{
+			Id: ID,
 			Present: message,
 		}
 		if err := stream.Send(data); err != nil {
@@ -117,6 +122,7 @@ func (s *ControlServerType) YourState(ctx context.Context,
 
 	log.Println("rep->", instance)
 	return &pb.StateResponse{
+		Id: ID,
 		Reply: fmt.Sprintf(" %d all systems are go", instance),
 	}, nil
 }

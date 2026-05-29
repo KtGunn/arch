@@ -11,6 +11,7 @@ import (
 	empty "github.com/golang/protobuf/ptypes/empty"
 )
 
+var TrafficID string
 
 // EngageTraffic
 // The function launches go routines to capture
@@ -32,7 +33,6 @@ func EngageTraffic(ctx context.Context) int {
 	}(ctx, TrafficClient.Client)
 
 	return goRoutines
-
 }
 
 
@@ -46,17 +46,13 @@ func StateToAndFro(ctx context.Context, client pb.TrafficClient) error {
 	for {
 		select {
 		case query := <-PChannels.stateQyToControls:
-
-			pbQuery := &pb.StateQuery{
-				Ask: query,
-			}
-			stateResponse, err := client.YourState(ctx, pbQuery)
+			stateResponse, err := client.YourState(ctx, query)
 			if err != nil {
 				log.Println("error querying Controls", err)
 				return err
 			}
 
-			registerAResponse(stateResponse.Reply)
+			registerAResponse(stateResponse)
 		}
 	}
 }
@@ -68,23 +64,24 @@ func Data(ctx context.Context, client pb.TrafficClient) {
 	var err error
 	nul := &empty.Empty{}
 
+	log.Println(" top of Data(ctx,client)...")
+
 	for {
 		stream, err = client.Data(ctx, nul)
-
 		if err == io.EOF {
 			log.Println("Control stream done.")
 			return
 		}
-		
 		if err != nil {
 			log.Println("No control stream yet...")
 			time.Sleep(3*time.Second)
-		} else {
-			break
+			continue
 		}
+		break
 	}
 
 
+	log.Println(" stream to Traffic is established...")
 	for {
 
 		headCount, err := stream.Recv()
@@ -104,9 +101,7 @@ func Data(ctx context.Context, client pb.TrafficClient) {
 		case <-ctx.Done():
 			return
 		default:
-			// pass to bridge client
-			freshData(headCount.Present)
-
+			freshData(headCount)
 		}
 	}
 }
