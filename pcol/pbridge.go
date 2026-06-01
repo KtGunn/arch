@@ -72,9 +72,12 @@ func DataStream(ctx context.Context, client pb.BridgeClient, id string) {
 
 func openDataStream(ctx context.Context,	client pb.BridgeClient) (grpc.ClientStreamingClient[pb.HeadCount, empty.Empty], bool) {
 
+	var stream grpc.ClientStreamingClient[pb.HeadCount, empty.Empty]
+	var err error
+
 	for {
 
-		stream, err := client.Data(ctx)
+		stream, err = client.Data(ctx)
 		if err == nil {
 			return stream, false
 		}
@@ -127,8 +130,13 @@ func StateFroAndTo(ctx context.Context, client pb.BridgeClient, id string) {
 }
 
 func openStateFroAndTo(ctx context.Context, client pb.BridgeClient) (grpc.BidiStreamingClient[pb.StateResponse,pb.StateQuery], bool) {
+
+	var err error
+	var stream grpc.BidiStreamingClient[pb.StateResponse,pb.StateQuery]
+
 	for {
-		stream, err := client.YourState(ctx)
+		log.Println(" trying to open bridge for query")
+		stream, err = client.YourState(ctx)
 		if err == nil {
 			return stream, false
 		}
