@@ -1,0 +1,38 @@
+package main
+
+import (
+	"fmt"
+	"log"
+	"math/rand/v2"
+	"time"
+)
+
+func generateHeadCount(bugOut chan interface{}) {
+
+	names := []string{"bob", "joe", "ken", "art", "cye", "skinny"}
+	count := -1
+
+	for {
+
+		count++
+		message := fmt.Sprintf("%d: ", count)
+
+		for n := range names {
+			if rand.IntN(100) >= 50 {
+				name := names[n]
+				message += name + " "
+			}
+		}
+
+		select {
+
+		case <-time.After(5 * time.Second):
+			log.Println(" <-", message)
+			dataChan <- message
+
+		case <-bugOut:
+			log.Println(" head count generator bugging out!")
+			return
+		}
+	}
+}
