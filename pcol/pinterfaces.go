@@ -6,6 +6,7 @@ import (
 )
 
 
+
 var PChannels *PcolChannels
 
 func NewPChannels() *PcolChannels {
@@ -28,19 +29,19 @@ func (s *PcolChannels) init() {
 
 // Traffic -> Bridge
 func freshData(data *pb.HeadCount) {
-	log.Println(" .Data ")
+	log.Println(".Data ")
 	PChannels.dataStream <- data
 }
 
 // Bridge -> Traffic
 func postAQuery(query *pb.StateQuery) {
-	log.Println(" ..POST Query")
+	log.Println(" ..Query")
 	PChannels.stateQyToControls <- query
 }
 
 
 // Traffic -> Bridge
 func registerAResponse(response *pb.StateResponse) {
-	log.Println(" ....REGISTER reply")
+	log.Println(" Reply..")
 	PChannels.stateRespToBridge <- response
 }

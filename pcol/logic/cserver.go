@@ -7,7 +7,6 @@ import (
 	"net"
 	"time"
 
-	
 	"google.golang.org/grpc"
 
 	pb "mockup/proto"
@@ -96,7 +95,6 @@ func (s *ControlServerType) Data(_ *empty.Empty, stream pb.Traffic_DataServer) e
 	for {
 		select {
 		case message := <-dataChan:
-			Logger.Println("->Logic sending message")
 			data := &pb.HeadCount{
 				Present: message,
 			}
@@ -109,8 +107,8 @@ func (s *ControlServerType) Data(_ *empty.Empty, stream pb.Traffic_DataServer) e
 		case <-s.ctx.Done():
 			return nil
 
-		case <-time.After(5 * time.Second):
-			Logger.Println("..Logic tick")
+		case <-time.After(10 * time.Second):
+			log.Println("..tick")
 
 		}
 	}

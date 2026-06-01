@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 	"sync"
+	"math/rand/v2"
 	
 	pb "mockup/proto"
 )
@@ -64,15 +65,13 @@ func launchUser(id int, howManyQueries int) {
 				st := streamer.(*streamData[pb.Bridge_YourStateServer,pb.StateQuery])
 				pipe := st.pipeLine
 				
-				log.Println(" POSTING A QUERY")
 				doQuery(pipe, &pb.StateQuery{
 					Ask: fmt.Sprintf("qy.%d->%s", n, key),
 				})
 				n++
 			}
+			time.Sleep(time.Duration(2+rand.IntN(8))*time.Second)
 		}
-		log.Println(" ... zzzz sleeping")
-		time.Sleep(5*time.Second)
 	}
 }
 
