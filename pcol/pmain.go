@@ -23,12 +23,10 @@ func main() {
 	PChannels = NewPChannels()
 	PChannels.init()
 
-	ready := make(chan struct{})
 	go func() {
-		logic.RunLogic(cfg.logicPort, cfg.logicId, ready)
+		logic.RunLogic(cfg.logicPort, cfg.logicId)
 	}()
 
-	<-ready
 	LaunchClients(ctx, cfg.bridgePort, cfg.logicPort, cfg.logicId)
 
 	log.Println(" All done?")
