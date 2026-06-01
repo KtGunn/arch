@@ -7,18 +7,21 @@ import (
 	"net"
 	"sync"
 	"time"
-
+	"context"
 	pb "mockup/proto"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
 
+////////////////////////////////////////////////////////////
 // Bridge Server definition
 //
+var Bridge *BridgeServerData
+
 type BridgeServerData struct {
 	pb.UnimplementedBridgeServer
 	Connections sync.Map
@@ -27,14 +30,12 @@ type BridgeServerData struct {
 func NewBridge() *BridgeServerData {
 	return &BridgeServerData{}
 }
-
-var Bridge *BridgeServerData
-
-var once sync.Once
+//...
 
 
 
 
+////////////////////////////////////////////////////////////
 // LaunchBridge
 //
 func LaunchBridge(port int) {
@@ -52,38 +53,52 @@ func LaunchBridge(port int) {
 
 	Bridge = NewBridge()
 	pb.RegisterBridgeServer(grpcServer, Bridge)
-	
 
-	log.Println("Bridge waiting for data traffic on ", port)
+	log.Println("Bridge Server waiting client connections on port", port)
 	grpcServer.Serve(lis)
+}
+//...
+
+
+
+
+////////////////////////////////////////////////////////////
+// Extract the Identity of the connection
+// from metadata
+//
+func idFromMetadata(tag string, ctx context.Context) (string, error) {
+
+	var ok bool
+	var md map[string][]string
+
+	md, ok = metadata.FromIncomingContext(ctx)
+	if !ok {
+		return "", status.Errorf(codes.DataLoss, "metadata missing from context")
+	}
+
+	var t []string
+
+	if t, ok = md[tag]; !ok {
+		return "", fmt.Errorf("no identity from context: %+v", md)
+	}
+
+	return t[0], nil
 }
 
 
-
-
-// Data
-// This rpc is CLIENT STREAMING
+////////////////////////////////////////////////////////////
+// Data -- CLIENT STREAMING
 // --
 func (s *BridgeServerData) Data(stream pb.Bridge_DataServer) error {
 	log.Printf(":: Data stream: %+v", stream)
-	
-	var ok bool
-	var md map[string][]string
-	md, ok = metadata.FromIncomingContext(stream.Context())
-	if !ok {
-		return status.Errorf(codes.DataLoss, "BridgeServer: failed to get metadata")
+
+	identity, err := idFromMetadata("identity", stream.Context())
+	if err != nil {
+		log.Println(err)
 	}
 
-	var identity string
-	var t []string
-	if t, ok = md["identity"]; !ok {
-		log.Fatalf("no identity from stream: %+v", md)
-	}
-	identity = t[0]
+	userPresent.Do(pcolIsConnected)
 
-
-	once.Do(pcolIsConnected)
-	
 	for {
 		in, err := stream.Recv()
 
@@ -99,45 +114,37 @@ func (s *BridgeServerData) Data(stream pb.Bridge_DataServer) error {
 		freshData(in, identity)
 	}
 
-	return nil
 }
-
 
 // YourState
 // This rpc passes,.
 //
 //	StateRequest server->client and
 //	 StateResponse client<-server
+//
 // --
-func (s *BridgeServerData) YourState(
-	stream grpc.BidiStreamingServer[pb.StateResponse, pb.StateQuery]) error {
+func (s *BridgeServerData) YourState(stream grpc.BidiStreamingServer[pb.StateResponse, pb.StateQuery]) error {
 	log.Printf(":: State stream: %+v", stream)
 
-
-	var ok bool
-	var md map[string][]string
-	md, ok = metadata.FromIncomingContext(stream.Context())
-	if !ok {
-		return status.Errorf(codes.DataLoss, "BridgeServer: failed to get metadata")
+	identity, err := idFromMetadata("identity", stream.Context())
+	if err != nil {
+		log.Println(err)
 	}
 
-	var identity string
-	var t []string
-	if t, ok = md["identity"]; !ok {
-		log.Fatalf("no identity from stream: %+v", md)
-	}
-	identity = t[0]
 
-	addClient(identity, "stateQy", stream)	
+	queryPipe := addClient(identity, StateStreamer, stream)
+	//queryPipe := addClient(identity, StateStreamer, stream.(pb.Bridge_YourStateServer))
+	log.Println(" client has been added and pipe returned")
 
-	once.Do(pcolIsConnected)
+	userPresent.Do(pcolIsConnected)
 
 	//
 	// State Response
 	//
-	go func(){
+	go func() {
 		for {
 			reply, err := stream.Recv()
+
 			if err == io.EOF {
 				log.Println("BS eof", err)
 				return
@@ -149,30 +156,23 @@ func (s *BridgeServerData) YourState(
 
 			stateResponse(reply, identity)
 		}
-
 	}()
-
-
 
 	//
 	// State Query
 	//
 	for {
 
-		select  {
+		select {
 
-		case query := <-BChannels.stateQuery:
+		case query := <-queryPipe:
 			log.Println(" bs sending a query")
-			stream.Send(query)
-			
-		case <-time.After(10*time.Second):
+			stream.Send(&query)
+
+		case <-time.After(10 * time.Second):
 			log.Println("bs tick")
 
 		}
 
 	}
-
-	return nil
 }
-
-

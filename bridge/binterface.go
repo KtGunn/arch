@@ -9,7 +9,7 @@ import (
 
 
 // Do.Once
-
+//
 func pcolIsConnected() {
 	close(BChannels.pcolConnected)
 }
@@ -45,15 +45,14 @@ func freshData(data *pb.HeadCount, id string) {
 	log.Println(id, "Data:", data)
 }
 
-
 func stateResponse(reply *pb.StateResponse, id string) {
-	log.Println(id, reply)
+	log.Println("from", id, ":", reply)
 	BChannels.stateResponse <- reply
 }
 
-func postAStateQuery(ask *pb.StateQuery) {
+func postAStateQuery(pipe chan pb.StateQuery, ask *pb.StateQuery) {
 	log.Println(ask, "->")
 
-	BChannels.stateQuery <- ask
+	pipe <- *ask
 }
 
