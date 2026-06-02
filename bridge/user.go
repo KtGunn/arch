@@ -56,12 +56,13 @@ func launchUser(id int, howManyQueries int) {
 	log.Println(" user is waiting for pcol to be connected...")
 	<-BChannels.pcolConnected
 
+	time.Sleep(2*time.Second)
+	
 	n := 0
 	for {
 		for key, streamer := range newClients {
-			time.Sleep(time.Duration(2+rand.IntN(8))*time.Second)
 			
-			log.Println("type", streamer.Type())
+			log.Println("type", streamer.Type(), "id", key)
 			if streamer.Type() == StateStreamer {
 				st := streamer.(*streamData[pb.Bridge_YourStateServer,pb.StateQuery])
 				pipe := st.pipeLine
@@ -71,6 +72,7 @@ func launchUser(id int, howManyQueries int) {
 				})
 				n++
 			}
+			time.Sleep(time.Duration(2+rand.IntN(8))*time.Second)
 		}
 	}
 }

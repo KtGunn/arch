@@ -10,7 +10,6 @@ import (
 	"google.golang.org/grpc"
 
 	pb "mockup/proto"
-	empty "github.com/golang/protobuf/ptypes/empty"
 )
 
 
@@ -19,12 +18,16 @@ import (
 var ControlServer *ControlServerType
 
 func NewControlServer() *ControlServerType {
-	return &ControlServerType{}
+	return &ControlServerType{
+		dataFlow: false,
+	}
 }
 
 type ControlServerType struct {
 	pb.UnimplementedTrafficServer
 	ctx context.Context
+
+	dataFlow bool
 }
 // --
 
@@ -77,9 +80,14 @@ func LaunchServer(port int, id string) {
 	grpcServer.Serve(lis)
 }
 
+
+
+
+//////////////////////////////////////////////////////////////////////
 // Data
 // the server streaming method
-func (s *ControlServerType) Data(_ *empty.Empty, stream pb.Traffic_DataServer) error {
+//
+func (s *ControlServerType) Data(in *pb.FlowControl, stream pb.Traffic_DataServer) error {
 
 	Logger.Println(" ready to stream head count")
 
@@ -99,9 +107,13 @@ func (s *ControlServerType) Data(_ *empty.Empty, stream pb.Traffic_DataServer) e
 				Present: message,
 			}
 
-			if err := stream.Send(data); err != nil {
-				Logger.Println("Client might be gone")
-				return err
+			if s.dataFlow {
+				if err := stream.Send(data); err != nil {
+					Logger.Println("Client might be gone")
+					return err
+				}
+			} else {
+				Logger.Println("Data flow Off")
 			}
 
 		case <-s.ctx.Done():
@@ -115,9 +127,15 @@ func (s *ControlServerType) Data(_ *empty.Empty, stream pb.Traffic_DataServer) e
 
 	return nil
 }
+//...
 
+
+
+
+//////////////////////////////////////////////////////////////////////
 // YourState
 // response to the query
+//
 var instance int
 
 func (s *ControlServerType) YourState(ctx context.Context,
@@ -131,3 +149,4 @@ func (s *ControlServerType) YourState(ctx context.Context,
 		Reply: fmt.Sprintf(" %d all systems are go", instance),
 	}, nil
 }
+//...

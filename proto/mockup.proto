@@ -27,7 +27,7 @@ message HeadCount {
 }
 
 message FlowControl {
-        int32 onoff = 1;
+        int32 OnOff = 1;
 }
 
 service Traffic {

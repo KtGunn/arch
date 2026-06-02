@@ -162,7 +162,7 @@ func (x *HeadCount) GetPresent() string {
 
 type FlowControl struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Onoff         int32                  `protobuf:"varint,1,opt,name=onoff,proto3" json:"onoff,omitempty"`
+	OnOff         int32                  `protobuf:"varint,1,opt,name=OnOff,proto3" json:"OnOff,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -197,9 +197,9 @@ func (*FlowControl) Descriptor() ([]byte, []int) {
 	return file_mockup_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *FlowControl) GetOnoff() int32 {
+func (x *FlowControl) GetOnOff() int32 {
 	if x != nil {
-		return x.Onoff
+		return x.OnOff
 	}
 	return 0
 }
@@ -217,7 +217,7 @@ const file_mockup_proto_rawDesc = "" +
 	"\tHeadCount\x12\x18\n" +
 	"\aPresent\x18\x02 \x01(\tR\aPresent\"#\n" +
 	"\vFlowControl\x12\x14\n" +
-	"\x05onoff\x18\x01 \x01(\x05R\x05onoff2{\n" +
+	"\x05OnOff\x18\x01 \x01(\x05R\x05OnOff2{\n" +
 	"\aTraffic\x12:\n" +
 	"\tYourState\x12\x13.sandbox.StateQuery\x1a\x16.sandbox.StateResponse\"\x00\x124\n" +
 	"\x04Data\x12\x14.sandbox.FlowControl\x1a\x12.sandbox.HeadCount\"\x000\x012\x80\x01\n" +

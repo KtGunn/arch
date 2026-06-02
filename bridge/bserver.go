@@ -97,20 +97,24 @@ func (s *BridgeServerData) Data(stream pb.Bridge_DataServer) error {
 		log.Println(err)
 	}
 
+	defer func() {
+		log.Println("Data ending; client", identity, "to be removed")
+		removeClient(identity,"def-Data")
+	}()
+	
 	userPresent.Do(pcolIsConnected)
 
 	for {
 		in, err := stream.Recv()
-
+		
 		if err == io.EOF {
 			log.Println("Data eof")
 			return err
-		}
-		if err != nil {
+		} else {
 			log.Println("Data nil")
 			return err
 		}
-
+		
 		freshData(in, identity)
 	}
 
@@ -130,30 +134,48 @@ func (s *BridgeServerData) YourState(stream grpc.BidiStreamingServer[pb.StateRes
 	if err != nil {
 		log.Println(err)
 	}
-
+	
+	defer func() {
+		removeClient(identity,"state-def-Data")
+	}()
 
 	queryPipe := addClient(identity, StateStreamer, stream)
-
 	log.Println(" client has been added and pipe returned", queryPipe)
 
 	userPresent.Do(pcolIsConnected)
+
+	
 
 	//
 	// State Response
 	//
 	go func() {
 		for {
+
+			select {
+
+			case <-stream.Context().Done():
+				log.Println("State stream context closed. Bye!")
+				return
+
+			default:
+				// go on
+			}
+
 			reply, err := stream.Recv()
 
 			if err == io.EOF {
 				log.Println("BS eof", err)
-				return
-			}
-			if err != nil {
-				log.Println("BS !nil", err)
+				removeClient(identity, "go-State-a")
 				return
 			}
 
+			if err != nil {
+				log.Println("BS !nil", err)
+				removeClient(identity, "go-State-b")
+				return
+			}
+			
 			stateResponse(reply, identity)
 		}
 	}()
@@ -161,14 +183,23 @@ func (s *BridgeServerData) YourState(stream grpc.BidiStreamingServer[pb.StateRes
 	//
 	// State Query
 	//
+getout:
 	for {
 
 		log.Println(identity, " awaiting qy")
 		select {
 
+		case <-stream.Context().Done():
+			log.Println("State stream context closed QY. Bye!")
+			return fmt.Errorf("context close")
+			
 		case query := <-queryPipe:
 			log.Println(" bs sending a query")
-			stream.Send(&query)
+
+			if err = stream.Send(&query); err != nil {
+				log.Println(" Bserver state query stream error:", err)
+				break getout
+			}
 
 		case <-time.After(2 * time.Second):
 			log.Println("bs tick")
@@ -176,4 +207,7 @@ func (s *BridgeServerData) YourState(stream grpc.BidiStreamingServer[pb.StateRes
 		}
 
 	}
+
+	removeClient(identity, "state-return")
+	return err
 }
