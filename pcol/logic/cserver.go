@@ -72,8 +72,8 @@ func LaunchServer(port int, id string) {
 	pb.RegisterTrafficServer(grpcServer, ControlServer)
 
 	InitChannels()
-	log.Println("close ready")
 
+	Logger.Println("Server now waiting for connections...")
 	grpcServer.Serve(lis)
 }
 

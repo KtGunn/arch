@@ -133,8 +133,8 @@ func (s *BridgeServerData) YourState(stream grpc.BidiStreamingServer[pb.StateRes
 
 
 	queryPipe := addClient(identity, StateStreamer, stream)
-	//queryPipe := addClient(identity, StateStreamer, stream.(pb.Bridge_YourStateServer))
-	log.Println(" client has been added and pipe returned")
+
+	log.Println(" client has been added and pipe returned", queryPipe)
 
 	userPresent.Do(pcolIsConnected)
 
@@ -163,13 +163,14 @@ func (s *BridgeServerData) YourState(stream grpc.BidiStreamingServer[pb.StateRes
 	//
 	for {
 
+		log.Println(identity, " awaiting qy")
 		select {
 
 		case query := <-queryPipe:
 			log.Println(" bs sending a query")
 			stream.Send(&query)
 
-		case <-time.After(10 * time.Second):
+		case <-time.After(2 * time.Second):
 			log.Println("bs tick")
 
 		}

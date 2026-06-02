@@ -59,6 +59,7 @@ func launchUser(id int, howManyQueries int) {
 	n := 0
 	for {
 		for key, streamer := range newClients {
+			time.Sleep(time.Duration(2+rand.IntN(8))*time.Second)
 			
 			log.Println("type", streamer.Type())
 			if streamer.Type() == StateStreamer {
@@ -70,7 +71,6 @@ func launchUser(id int, howManyQueries int) {
 				})
 				n++
 			}
-			time.Sleep(time.Duration(2+rand.IntN(8))*time.Second)
 		}
 	}
 }
