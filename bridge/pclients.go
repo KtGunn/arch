@@ -35,22 +35,19 @@ func (s *streamData[T, K]) Type() string {
 
 //...
 
+
 func removeClient(id string, tag string) {
 	log.Println("Removing", id, "tag", tag)
 
-	stH, ok := newClients[id]
+	_, ok := newClients[id]
 	if !ok {
-		log.Println("this client", id, "is already gone", stH)
+		log.Println("this client", id, "is already gone")
 		return
 	}
 
-	/*if stH.Type() == StateStreamer {
-		streamer := stH.(*streamData[grpc.BidiStreamingServer[pb.StateResponse, pb.StateQuery], pb.StateQuery])
-		streamer.messageStream.Context().Cancel
-		close(streamer.pipeLine)
-	}*/
 	delete(newClients, id)
 }
+
 
 func addClient(id string, kind string, stream any) chan pb.StateQuery {
 	log.Println(" ADDING A CLIENT", kind)

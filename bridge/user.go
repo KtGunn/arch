@@ -74,6 +74,9 @@ func launchUser(id int, howManyQueries int) {
 			}
 			time.Sleep(time.Duration(2+rand.IntN(8))*time.Second)
 		}
+
+		time.Sleep(2*time.Second)
+		log.Println(" we'll do it again")
 	}
 }
 

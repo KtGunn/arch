@@ -6,7 +6,8 @@ import (
 	"log"
 	"net"
 	"time"
-
+	"strings"
+	
 	"google.golang.org/grpc"
 
 	pb "mockup/proto"
@@ -141,12 +142,16 @@ var instance int
 func (s *ControlServerType) YourState(ctx context.Context,
 	ask *pb.StateQuery) (*pb.StateResponse, error) {
 
-	Logger.Println("rep->", instance)
+	first := strings.Split(ask.Ask, ".")
+	second := strings.Split(first[1], "-")
+	count := second[0]
+
+	Logger.Println("rep->", instance, "qy", count)
 	instance++
 
-
+	
 	return &pb.StateResponse{
-		Reply: fmt.Sprintf(" %d all systems are go", instance),
+		Reply: fmt.Sprintf("reply %d: qy %d", count, instance),
 	}, nil
 }
 //...
