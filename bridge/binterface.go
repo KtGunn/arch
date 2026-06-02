@@ -51,7 +51,7 @@ func stateResponse(reply *pb.StateResponse, id string) {
 }
 
 func postAStateQuery(pipe chan pb.StateQuery, ask *pb.StateQuery) {
-	log.Println(ask, "->")
+	log.Println(ask, "->", pipe)
 
 	pipe <- *ask
 }

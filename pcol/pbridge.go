@@ -19,11 +19,11 @@ import (
 // EngageBridge(...)
 //
 func EngageBridge(ctx context.Context, id string) int {
-	log.Println("Hello to Bridge")
 
 
 	goRoutines := 1
 	go func(ctx context.Context, client pb.BridgeClient){
+		log.Println("Establishing Bridge State")
 		StateFroAndTo(ctx, client, id)
 		wg.Done()
 	}(ctx, BridgeClient.Client)
@@ -31,6 +31,7 @@ func EngageBridge(ctx context.Context, id string) int {
 
 	goRoutines++
 	go func(ctx context.Context, client pb.BridgeClient){
+		log.Println("Establishing Bridge Data")
 		DataStream(ctx, client, id)
 		wg.Done()
 	}(ctx, BridgeClient.Client)
