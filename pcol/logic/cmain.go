@@ -11,6 +11,8 @@ var Logger *log.Logger
 func RunLogic (port int, id string) {
 	
 	logFile := openALog(fmt.Sprintf("ll_%s.log", id))
+
+	Logger.Println("****************** logging ******************")
 	Logger.Println("RunLogic port", port, "id", id)
 
 	defer func(){

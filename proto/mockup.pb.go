@@ -160,6 +160,50 @@ func (x *HeadCount) GetPresent() string {
 	return ""
 }
 
+type FlowControl struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	OnOff         int32                  `protobuf:"varint,1,opt,name=OnOff,proto3" json:"OnOff,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FlowControl) Reset() {
+	*x = FlowControl{}
+	mi := &file_mockup_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FlowControl) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FlowControl) ProtoMessage() {}
+
+func (x *FlowControl) ProtoReflect() protoreflect.Message {
+	mi := &file_mockup_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FlowControl.ProtoReflect.Descriptor instead.
+func (*FlowControl) Descriptor() ([]byte, []int) {
+	return file_mockup_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *FlowControl) GetOnOff() int32 {
+	if x != nil {
+		return x.OnOff
+	}
+	return 0
+}
+
 var File_mockup_proto protoreflect.FileDescriptor
 
 const file_mockup_proto_rawDesc = "" +
@@ -171,10 +215,12 @@ const file_mockup_proto_rawDesc = "" +
 	"\rStateResponse\x12\x14\n" +
 	"\x05reply\x18\x02 \x01(\tR\x05reply\"%\n" +
 	"\tHeadCount\x12\x18\n" +
-	"\aPresent\x18\x02 \x01(\tR\aPresent2}\n" +
+	"\aPresent\x18\x02 \x01(\tR\aPresent\"#\n" +
+	"\vFlowControl\x12\x14\n" +
+	"\x05OnOff\x18\x01 \x01(\x05R\x05OnOff2{\n" +
 	"\aTraffic\x12:\n" +
-	"\tYourState\x12\x13.sandbox.StateQuery\x1a\x16.sandbox.StateResponse\"\x00\x126\n" +
-	"\x04Data\x12\x16.google.protobuf.Empty\x1a\x12.sandbox.HeadCount\"\x000\x012\x80\x01\n" +
+	"\tYourState\x12\x13.sandbox.StateQuery\x1a\x16.sandbox.StateResponse\"\x00\x124\n" +
+	"\x04Data\x12\x14.sandbox.FlowControl\x1a\x12.sandbox.HeadCount\"\x000\x012\x80\x01\n" +
 	"\x06Bridge\x126\n" +
 	"\x04Data\x12\x12.sandbox.HeadCount\x1a\x16.google.protobuf.Empty\"\x00(\x01\x12>\n" +
 	"\tYourState\x12\x16.sandbox.StateResponse\x1a\x13.sandbox.StateQuery\"\x00(\x010\x01B\x0eZ\fmockup/protob\x06proto3"
@@ -191,21 +237,22 @@ func file_mockup_proto_rawDescGZIP() []byte {
 	return file_mockup_proto_rawDescData
 }
 
-var file_mockup_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_mockup_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_mockup_proto_goTypes = []any{
 	(*StateQuery)(nil),    // 0: sandbox.StateQuery
 	(*StateResponse)(nil), // 1: sandbox.StateResponse
 	(*HeadCount)(nil),     // 2: sandbox.HeadCount
-	(*empty.Empty)(nil),   // 3: google.protobuf.Empty
+	(*FlowControl)(nil),   // 3: sandbox.FlowControl
+	(*empty.Empty)(nil),   // 4: google.protobuf.Empty
 }
 var file_mockup_proto_depIdxs = []int32{
 	0, // 0: sandbox.Traffic.YourState:input_type -> sandbox.StateQuery
-	3, // 1: sandbox.Traffic.Data:input_type -> google.protobuf.Empty
+	3, // 1: sandbox.Traffic.Data:input_type -> sandbox.FlowControl
 	2, // 2: sandbox.Bridge.Data:input_type -> sandbox.HeadCount
 	1, // 3: sandbox.Bridge.YourState:input_type -> sandbox.StateResponse
 	1, // 4: sandbox.Traffic.YourState:output_type -> sandbox.StateResponse
 	2, // 5: sandbox.Traffic.Data:output_type -> sandbox.HeadCount
-	3, // 6: sandbox.Bridge.Data:output_type -> google.protobuf.Empty
+	4, // 6: sandbox.Bridge.Data:output_type -> google.protobuf.Empty
 	0, // 7: sandbox.Bridge.YourState:output_type -> sandbox.StateQuery
 	4, // [4:8] is the sub-list for method output_type
 	0, // [0:4] is the sub-list for method input_type
@@ -225,7 +272,7 @@ func file_mockup_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mockup_proto_rawDesc), len(file_mockup_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

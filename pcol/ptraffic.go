@@ -8,7 +8,6 @@ import (
 
 	pb "mockup/proto"
 	"google.golang.org/grpc"
-	empty "github.com/golang/protobuf/ptypes/empty"
 )
 
 var TrafficID string
@@ -62,9 +61,10 @@ func Data(ctx context.Context, client pb.TrafficClient) {
 
 	var stream grpc.ServerStreamingClient[pb.HeadCount]
 	var err error
-	nul := &empty.Empty{}
+	nul := &pb.FlowControl{
+		OnOff: 0,
+	}
 
-	log.Println(" top of Data(ctx,client)...")
 
 	for {
 		stream, err = client.Data(ctx, nul)
@@ -75,7 +75,7 @@ func Data(ctx context.Context, client pb.TrafficClient) {
 		}
 
 		if err != nil {
-			log.Println("No control stream yet...")
+			log.Println("  no Logic stream yet...")
 			time.Sleep(3*time.Second)
 			continue
 		}
@@ -84,7 +84,7 @@ func Data(ctx context.Context, client pb.TrafficClient) {
 	}
 
 
-	log.Println(" stream to Traffic is established...")
+	log.Println("stream to Logic is established...")
 	for {
 
 		headCount, err := stream.Recv()

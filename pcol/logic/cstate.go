@@ -27,7 +27,7 @@ func generateHeadCount(bugOut chan interface{}) {
 		select {
 			
 		case <-time.After(time.Duration(2+rand.IntN(4)) * time.Second):
-			Logger.Println(" <-", message)
+			//Logger.Println(" <-", message)
 			dataChan <- message
 
 		case <-bugOut:

@@ -54,5 +54,6 @@ func postAStateQuery(pipe chan pb.StateQuery, ask *pb.StateQuery) {
 	log.Println(ask, "->", pipe)
 
 	pipe <- *ask
+	log.Println(" -- not blocked!")
 }
 

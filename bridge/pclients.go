@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 	pb "mockup/proto"
-	"google.golang.org/grpc"
 
+	"google.golang.org/grpc"
 )
 
 // Clients
@@ -15,9 +15,8 @@ import (
 // to them specifically, and also route messages from them to the
 // appropriate modules on the server's end.
 
-///////////////////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////////////////
 // CLIENTS LIST
-//
 var newClients map[string]streamHolder
 
 type streamHolder interface {
@@ -30,12 +29,28 @@ type streamData[T any, K any] struct {
 	pipeLine      chan K
 }
 
-func (s *streamData[T,K]) Type() string {
+func (s *streamData[T, K]) Type() string {
 	return s.streamType
 }
+
 //...
 
+func removeClient(id string, tag string) {
+	log.Println("Removing", id, "tag", tag)
 
+	stH, ok := newClients[id]
+	if !ok {
+		log.Println("this client", id, "is already gone", stH)
+		return
+	}
+
+	/*if stH.Type() == StateStreamer {
+		streamer := stH.(*streamData[grpc.BidiStreamingServer[pb.StateResponse, pb.StateQuery], pb.StateQuery])
+		streamer.messageStream.Context().Cancel
+		close(streamer.pipeLine)
+	}*/
+	delete(newClients, id)
+}
 
 func addClient(id string, kind string, stream any) chan pb.StateQuery {
 	log.Println(" ADDING A CLIENT", kind)
@@ -56,11 +71,11 @@ func addClient(id string, kind string, stream any) chan pb.StateQuery {
 		}
 
 		log.Println(" new state stream client added")
-		newClients[id] = &streamData[grpc.BidiStreamingServer[pb.StateResponse,pb.StateQuery],pb.StateQuery] {
+		newClients[id] = &streamData[grpc.BidiStreamingServer[pb.StateResponse, pb.StateQuery], pb.StateQuery]{
 			streamType:    kind,
 			messageStream: s,
-			pipeLine: make(chan pb.StateQuery),
- 		}
+			pipeLine:      make(chan pb.StateQuery),
+		}
 
 		stD = newClients[id]
 	}
@@ -69,5 +84,5 @@ func addClient(id string, kind string, stream any) chan pb.StateQuery {
 		log.Println("not type *streamData[Bridge_YourStateClient]")
 	}
 
-	return newClients[id].(*streamData[grpc.BidiStreamingServer[pb.StateResponse,pb.StateQuery],pb.StateQuery]).pipeLine
+	return newClients[id].(*streamData[grpc.BidiStreamingServer[pb.StateResponse, pb.StateQuery], pb.StateQuery]).pipeLine
 }
