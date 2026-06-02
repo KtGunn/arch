@@ -26,12 +26,16 @@ message HeadCount {
         string Present = 2;
 }
 
+message FlowControl {
+        int32 onoff = 1;
+}
+
 service Traffic {
         // Client asking controller for state
         rpc YourState(StateQuery) returns (StateResponse) {}
 
         // Server streaming data
-        rpc Data(google.protobuf.Empty) returns (stream  HeadCount) {}
+        rpc Data(FlowControl) returns (stream  HeadCount) {}
 }
 
 service Bridge {

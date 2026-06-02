@@ -36,7 +36,7 @@ type TrafficClient interface {
 	// Client asking controller for state
 	YourState(ctx context.Context, in *StateQuery, opts ...grpc.CallOption) (*StateResponse, error)
 	// Server streaming data
-	Data(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[HeadCount], error)
+	Data(ctx context.Context, in *FlowControl, opts ...grpc.CallOption) (grpc.ServerStreamingClient[HeadCount], error)
 }
 
 type trafficClient struct {
@@ -57,13 +57,13 @@ func (c *trafficClient) YourState(ctx context.Context, in *StateQuery, opts ...g
 	return out, nil
 }
 
-func (c *trafficClient) Data(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[HeadCount], error) {
+func (c *trafficClient) Data(ctx context.Context, in *FlowControl, opts ...grpc.CallOption) (grpc.ServerStreamingClient[HeadCount], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	stream, err := c.cc.NewStream(ctx, &Traffic_ServiceDesc.Streams[0], Traffic_Data_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &grpc.GenericClientStream[empty.Empty, HeadCount]{ClientStream: stream}
+	x := &grpc.GenericClientStream[FlowControl, HeadCount]{ClientStream: stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -83,7 +83,7 @@ type TrafficServer interface {
 	// Client asking controller for state
 	YourState(context.Context, *StateQuery) (*StateResponse, error)
 	// Server streaming data
-	Data(*empty.Empty, grpc.ServerStreamingServer[HeadCount]) error
+	Data(*FlowControl, grpc.ServerStreamingServer[HeadCount]) error
 	mustEmbedUnimplementedTrafficServer()
 }
 
@@ -97,7 +97,7 @@ type UnimplementedTrafficServer struct{}
 func (UnimplementedTrafficServer) YourState(context.Context, *StateQuery) (*StateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method YourState not implemented")
 }
-func (UnimplementedTrafficServer) Data(*empty.Empty, grpc.ServerStreamingServer[HeadCount]) error {
+func (UnimplementedTrafficServer) Data(*FlowControl, grpc.ServerStreamingServer[HeadCount]) error {
 	return status.Errorf(codes.Unimplemented, "method Data not implemented")
 }
 func (UnimplementedTrafficServer) mustEmbedUnimplementedTrafficServer() {}
@@ -140,11 +140,11 @@ func _Traffic_YourState_Handler(srv interface{}, ctx context.Context, dec func(i
 }
 
 func _Traffic_Data_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(empty.Empty)
+	m := new(FlowControl)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(TrafficServer).Data(m, &grpc.GenericServerStream[empty.Empty, HeadCount]{ServerStream: stream})
+	return srv.(TrafficServer).Data(m, &grpc.GenericServerStream[FlowControl, HeadCount]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
